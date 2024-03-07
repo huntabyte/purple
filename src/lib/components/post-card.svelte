@@ -13,6 +13,7 @@
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { sleep } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
+	import { page } from '$app/stores';
 
 	type Props = {
 		post: PostWithUser;
@@ -37,6 +38,9 @@
 		editDialogOpen: false,
 		dropdownOpen: false
 	});
+
+	// eslint-disable-next-line svelte/valid-compile
+	$page;
 </script>
 
 <Card.Root>
@@ -44,30 +48,32 @@
 		<Card.Title>
 			{post.title}
 		</Card.Title>
-		<DropdownMenu.Root bind:open={openStates.dropdownOpen}>
-			<DropdownMenu.Trigger class={buttonVariants({ size: 'icon', variant: 'ghost' })}>
-				<MoreVertical class="size-4" />
-				<span class="sr-only">Post options</span>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Item>
-					<SquarePen class="mr-2 size-4" />
-					Edit
-				</DropdownMenu.Item>
-				<DropdownMenu.Item
-					on:click={(e) => {
-						e.preventDefault();
-						openStates.dropdownOpen = false;
-						sleep(2).then(() => {
-							openStates.deleteDialogOpen = true;
-						});
-					}}
-				>
-					<Trash class="mr-2 size-4" />
-					Delete
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+		{#if $page.data.user && $page.data.user.id === post.userId}
+			<DropdownMenu.Root bind:open={openStates.dropdownOpen}>
+				<DropdownMenu.Trigger class={buttonVariants({ size: 'icon', variant: 'ghost' })}>
+					<MoreVertical class="size-4" />
+					<span class="sr-only">Post options</span>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<DropdownMenu.Item>
+						<SquarePen class="mr-2 size-4" />
+						Edit
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						on:click={(e) => {
+							e.preventDefault();
+							openStates.dropdownOpen = false;
+							sleep(2).then(() => {
+								openStates.deleteDialogOpen = true;
+							});
+						}}
+					>
+						<Trash class="mr-2 size-4" />
+						Delete
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		{/if}
 	</Card.Header>
 	<Card.Content>
 		{post.content}
