@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CreatePostDialog } from '$lib/components';
+	import { CreatePostDialog, PostCard } from '$lib/components';
 
 	let { data } = $props();
 </script>
@@ -12,6 +12,9 @@
 			You need to be logged in to create a post <a href="/login" class="underline">Login now</a>
 		</p>
 	{/if}
-
-	<pre>{JSON.stringify(data.posts, null, 2)}</pre>
+	<div class="flex flex-col gap-4">
+		{#each data.posts as post (post.id)}
+			<PostCard {post} />
+		{/each}
+	</div>
 </div>
