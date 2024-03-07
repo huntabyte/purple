@@ -13,7 +13,7 @@
 		"format": "prettier --write .",
 		"db:push": "drizzle-kit push:sqlite",
 		"studio": "drizzle-kit studio",
-		"seed": "node ./scripts/seed.js"
+		"seed": "tsx scripts/seed.js"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^8.4.1",
