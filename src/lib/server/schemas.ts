@@ -1,11 +1,21 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { text, integer, sqliteTable } from 'drizzle-orm/sqlite-core';
 import { generateId } from 'lucia';
+
+const timestamps = {
+	createdAt: text('created_at')
+		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: text('updated_at')
+		.notNull()
+		.default(sql`CURRENT_TIMESTAMP`)
+};
 
 export const users = sqliteTable('user', {
 	id: text('id').notNull().primaryKey(),
 	username: text('username').notNull().unique(),
-	hashed_password: text('hashed_password').notNull()
+	hashed_password: text('hashed_password').notNull(),
+	...timestamps
 });
 
 export const sessions = sqliteTable('session', {
@@ -25,7 +35,8 @@ export const posts = sqliteTable('post', {
 		.notNull()
 		.references(() => users.id),
 	title: text('title').notNull(),
-	content: text('content').notNull()
+	content: text('content').notNull(),
+	...timestamps
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
