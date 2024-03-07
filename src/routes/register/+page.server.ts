@@ -8,6 +8,7 @@ import { eq } from 'drizzle-orm';
 import { generateId } from 'lucia';
 import { Argon2id } from 'oslo/password';
 import { lucia } from '$lib/server/auth';
+import { db } from '$lib/server/db';
 
 export const load: PageServerLoad = async (event) => {
 	if (event.locals.user) redirect(302, '/');
@@ -26,7 +27,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const userExists = event.locals.db
+		const userExists = db
 			.select({ username: users.username })
 			.from(users)
 			.where(eq(users.username, form.data.username))
@@ -39,7 +40,7 @@ export const actions: Actions = {
 		const userId = generateId(15);
 		const hashedPassword = await new Argon2id().hash(form.data.password);
 
-		const { insertedId } = event.locals.db
+		const { insertedId } = db
 			.insert(users)
 			.values({ username: form.data.username, hashed_password: hashedPassword, id: userId })
 			.returning({ insertedId: users.id })

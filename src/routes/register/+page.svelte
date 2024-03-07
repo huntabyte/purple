@@ -2,7 +2,7 @@
 	import * as Form from '$lib/components/ui/form/index.js';
 	import { Input } from '$lib/components/ui/input';
 	import { registerSchema } from '$lib/zod-schemas.js';
-	import SuperDebug, { superForm } from 'sveltekit-superforms';
+	import { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	let { data } = $props();
 
@@ -36,10 +36,7 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
+		<Form.Errors errors={$errors._errors} />
 		<Form.Button>Register</Form.Button>
 	</form>
 </div>
-<div>errors:</div>
-<SuperDebug data={$errors} />
-<div>data:</div>
-<SuperDebug data={$formData} />
