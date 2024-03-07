@@ -11,7 +11,6 @@
 
 <div class="mx-auto w-full max-w-xl">
 	<pre>User: {JSON.stringify(data.user, null, 2)}</pre>
-	<pre>Session: {JSON.stringify(data.session, null, 2)}</pre>
 	<div class="flex items-center justify-between">
 		<div class="flex max-w-xl items-center gap-4 py-8">
 			<Button href="/login" variant={$page.url.pathname.includes('login') ? 'outline' : 'ghost'}
