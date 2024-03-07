@@ -2,6 +2,7 @@
 	import '../app.pcss';
 	import { Button } from '$lib/components/ui/button';
 	import { page } from '$app/stores';
+	import { Toaster } from '$lib/components/ui/sonner';
 
 	let { data } = $props();
 
@@ -9,6 +10,7 @@
 	$page;
 </script>
 
+<Toaster />
 <div class="flex h-16 w-full items-center border-b">
 	<div class="container flex items-center justify-between">
 		<div>
