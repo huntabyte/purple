@@ -1,17 +1,16 @@
 <script lang="ts">
 	import * as Form from '$lib/components/ui/form/index.js';
 	import { Input } from '$lib/components/ui/input';
-	import { registerSchema } from '$lib/schemas.js';
-	import { superForm } from 'sveltekit-superforms';
+	import { registerSchema } from '$lib/zod-schemas.js';
+	import SuperDebug, { superForm } from 'sveltekit-superforms';
 	import { zodClient } from 'sveltekit-superforms/adapters';
-
 	let { data } = $props();
 
 	const form = superForm(data.form, {
 		validators: zodClient(registerSchema)
 	});
 
-	const { form: formData, enhance } = form;
+	const { form: formData, enhance, errors } = form;
 </script>
 
 <div class="mx-auto flex max-w-xl py-8">
@@ -40,3 +39,7 @@
 		<Form.Button>Register</Form.Button>
 	</form>
 </div>
+<div>errors:</div>
+<SuperDebug data={$errors} />
+<div>data:</div>
+<SuperDebug data={$formData} />

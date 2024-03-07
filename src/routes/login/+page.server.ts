@@ -1,4 +1,4 @@
-import { loginSchema } from '$lib/schemas';
+import { loginSchema } from '$lib/zod-schemas';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { setError, superValidate } from 'sveltekit-superforms';
