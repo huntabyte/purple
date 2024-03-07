@@ -1,14 +1,16 @@
 import { db } from '$lib/server/db';
-import { superValidate } from 'sveltekit-superforms';
+import { setError, superValidate } from 'sveltekit-superforms';
 import type { Actions, PageServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
-import { createPostSchema } from '$lib/zod-schemas';
+import { createPostSchema, deletePostSchema } from '$lib/zod-schemas';
 import { fail, redirect } from '@sveltejs/kit';
 import { posts } from '$lib/server/schemas';
 import { generateId } from 'lucia';
+import { eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async () => {
 	const createPostForm = await superValidate(zod(createPostSchema));
+	const deletePostForm = await superValidate(zod(deletePostSchema));
 
 	const posts = await db.query.posts.findMany({
 		orderBy: (posts, { desc }) => [desc(posts.createdAt)],
@@ -23,7 +25,8 @@ export const load: PageServerLoad = async () => {
 
 	return {
 		posts,
-		createPostForm
+		createPostForm,
+		deletePostForm
 	};
 };
 
@@ -42,5 +45,33 @@ export const actions: Actions = {
 		await db.insert(posts).values({ id: postId, ...form.data, userId: event.locals.user.id });
 
 		return { form };
+	},
+	deletePost: async (event) => {
+		if (!event.locals.user) redirect(302, '/login');
+		const form = await superValidate(event.url, zod(deletePostSchema));
+
+		if (!form.valid) {
+			return setError(form, '', 'Error deleting post');
+		}
+
+		const post = await db.query.posts.findFirst({
+			where: eq(posts.id, form.data.id),
+			with: {
+				user: {
+					columns: {
+						id: true
+					}
+				}
+			}
+		});
+		if (!post || post.userId !== event.locals.user.id) {
+			return setError(form, '', 'Unable to delete post.');
+		}
+
+		await db.delete(posts).where(eq(posts.id, form.data.id));
+
+		return {
+			form
+		};
 	}
 };
