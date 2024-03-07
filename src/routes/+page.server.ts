@@ -7,6 +7,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import { posts } from '$lib/server/schemas';
 import { generateId } from 'lucia';
 import { eq } from 'drizzle-orm';
+import { isUserPostOwner } from '$lib/server/helpers';
 
 export const load: PageServerLoad = async () => {
 	const createPostForm = await superValidate(zod(createPostSchema));
@@ -54,17 +55,7 @@ export const actions: Actions = {
 			return setError(form, '', 'Error deleting post');
 		}
 
-		const post = await db.query.posts.findFirst({
-			where: eq(posts.id, form.data.id),
-			with: {
-				user: {
-					columns: {
-						id: true
-					}
-				}
-			}
-		});
-		if (!post || post.userId !== event.locals.user.id) {
+		if (!isUserPostOwner(form.data.id, event.locals.user.id)) {
 			return setError(form, '', 'Unable to delete post.');
 		}
 
