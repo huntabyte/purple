@@ -18,6 +18,7 @@
 	let open = $state(false);
 
 	const form = superForm(theForm, {
+		id: `createPostForm`,
 		validators: zodClient(createPostSchema),
 		onUpdated: ({ form: updForm }) => {
 			if (!updForm.valid) return;

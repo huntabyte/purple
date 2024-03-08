@@ -14,7 +14,7 @@
 	{/if}
 	<div class="flex flex-col gap-4">
 		{#each data.posts as post (post.id)}
-			<PostCard {post} form={data.deletePostForm} />
+			<PostCard {post} updatePostForm={data.updatePostForm} form={data.deletePostForm} />
 		{/each}
 	</div>
 </div>

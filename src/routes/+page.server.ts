@@ -2,7 +2,7 @@ import { db } from "$lib/server/db";
 import { setError, superValidate } from "sveltekit-superforms";
 import type { Actions, PageServerLoad } from "./$types";
 import { zod } from "sveltekit-superforms/adapters";
-import { createPostSchema, deletePostSchema } from "$lib/zod-schemas";
+import { createPostSchema, deletePostSchema, updatePostSchema } from "$lib/zod-schemas";
 import { fail, redirect } from "@sveltejs/kit";
 import { posts } from "$lib/server/schemas";
 import { generateId } from "lucia";
@@ -12,6 +12,7 @@ import { getPostById } from "$lib/server/helpers";
 export const load: PageServerLoad = async () => {
 	const createPostForm = await superValidate(zod(createPostSchema));
 	const deletePostForm = await superValidate(zod(deletePostSchema));
+	const updatePostForm = await superValidate(zod(updatePostSchema));
 
 	const posts = await db.query.posts.findMany({
 		orderBy: (posts, { desc }) => [desc(posts.createdAt)],
@@ -28,6 +29,7 @@ export const load: PageServerLoad = async () => {
 		posts,
 		createPostForm,
 		deletePostForm,
+		updatePostForm,
 	};
 };
 
@@ -64,5 +66,19 @@ export const actions: Actions = {
 		return {
 			form,
 		};
+	},
+	updatePost: async (event) => {
+		if (!event.locals.user) redirect(302, "/login");
+		const form = await superValidate(event, zod(updatePostSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const postId = event.url.searchParams.get("id");
+		if (!postId || !getPostById(postId, event.locals.user.id)) {
+			return setError(form, "", "Unable to update post.");
+		}
+
+		await db.update(posts).set(form.data).where(eq(posts.id, postId));
+
+		return { form };
 	},
 };
