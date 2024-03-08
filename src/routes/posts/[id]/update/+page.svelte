@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Card from "$lib/components/ui/card";
 	import type { PageData } from "./$types.js";
-	import UpdatePostForm from "$lib/components/update-post-form.svelte";
+	import PostUpdateForm from "$lib/components/post-update-form.svelte";
 
 	type Props = {
 		data: PageData;
@@ -16,7 +16,7 @@
 			<Card.Title>Update post</Card.Title>
 		</Card.Header>
 		<Card.Content>
-			<UpdatePostForm form={data.updatePostForm} post={data.post} />
+			<PostUpdateForm form={data.updatePostForm} post={data.post} open={{ value: false }} />
 		</Card.Content>
 	</Card.Root>
 </div>

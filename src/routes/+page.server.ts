@@ -2,7 +2,12 @@ import { db } from "$lib/server/db";
 import { setError, superValidate } from "sveltekit-superforms";
 import type { Actions, PageServerLoad } from "./$types";
 import { zod } from "sveltekit-superforms/adapters";
-import { createPostSchema, deletePostSchema, updatePostSchema } from "$lib/zod-schemas";
+import {
+	createPostCommentSchema,
+	createPostSchema,
+	deletePostSchema,
+	updatePostSchema,
+} from "$lib/zod-schemas";
 import { fail, redirect } from "@sveltejs/kit";
 import { posts } from "$lib/server/schemas";
 import { generateId } from "lucia";
@@ -13,6 +18,7 @@ export const load: PageServerLoad = async () => {
 	const createPostForm = await superValidate(zod(createPostSchema));
 	const deletePostForm = await superValidate(zod(deletePostSchema));
 	const updatePostForm = await superValidate(zod(updatePostSchema));
+	const createCommentForm = await superValidate(zod(createPostCommentSchema));
 
 	const posts = await db.query.posts.findMany({
 		orderBy: (posts, { desc }) => [desc(posts.createdAt)],
@@ -20,6 +26,20 @@ export const load: PageServerLoad = async () => {
 			user: {
 				columns: {
 					username: true,
+				},
+			},
+			comments: {
+				columns: {
+					content: true,
+					id: true,
+				},
+				with: {
+					user: {
+						columns: {
+							username: true,
+							id: true,
+						},
+					},
 				},
 			},
 		},
@@ -30,6 +50,7 @@ export const load: PageServerLoad = async () => {
 		createPostForm,
 		deletePostForm,
 		updatePostForm,
+		createCommentForm,
 	};
 };
 
