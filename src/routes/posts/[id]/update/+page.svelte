@@ -17,7 +17,7 @@
 
 	let { data, dialog = false } = $props<Props>();
 
-	let dialogOpen = $state(false);
+	$inspect(data);
 
 	const form = superForm(data.updatePostForm, {
 		validators: zodClient(updatePostSchema),
@@ -27,7 +27,6 @@
 			// success, show toast and close dialog
 			toast.success("Post updated successfully");
 			// close dialog if relevant
-			if (dialog && dialogOpen) dialogOpen = false;
 		},
 		resetForm: false,
 	});
@@ -56,7 +55,17 @@
 {/snippet}
 
 {#if dialog}
-	<Dialog.Root bind:open={dialogOpen}>
+	<Dialog.Root
+		open={dialog}
+		onOpenChange={(o) => {
+			if (!o) {
+				dialog = false;
+				history.back();
+			} else {
+				dialog = true;
+			}
+		}}
+	>
 		<Dialog.Content>
 			<Dialog.Header>
 				<Dialog.Title>Update post</Dialog.Title>

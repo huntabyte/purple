@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { CreatePostDialog, PostCard } from "$lib/components";
-
+	import SuperDebug from "sveltekit-superforms";
+	import { page } from "$app/stores";
 	let { data } = $props();
+
+	// eslint-disable-next-line svelte/valid-compile
+	$page
 </script>
+
+<SuperDebug data={$page.state} />
 
 <div class="container max-w-xl">
 	{#if data.session}

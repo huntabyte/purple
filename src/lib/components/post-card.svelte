@@ -1,4 +1,5 @@
 <script lang="ts">
+	import UpdatePostPage from "../../routes/posts/[id]/update/+page.svelte";
 	import * as Card from "$lib/components/ui/card";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import type { PostWithUser } from "$lib/server/schemas";
@@ -8,12 +9,13 @@
 	import Trash from "lucide-svelte/icons/trash";
 	import SquarePen from "lucide-svelte/icons/square-pen";
 	import { buttonVariants } from "./ui/button";
-	import { type SuperValidated, type Infer, superForm } from "sveltekit-superforms";
-	import { deletePostSchema } from "$lib/zod-schemas";
+	import SuperDebug, { type SuperValidated, type Infer, superForm } from "sveltekit-superforms";
+	import { deletePostSchema, updatePostSchema } from "$lib/zod-schemas";
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import { sleep } from "$lib/utils";
 	import { toast } from "svelte-sonner";
 	import { page } from "$app/stores";
+	import { goto, preloadData, pushState } from "$app/navigation";
 
 	type Props = {
 		post: PostWithUser;
@@ -39,6 +41,35 @@
 		dropdownOpen: false,
 	});
 
+	async function handleEditLinkClick(e: MouseEvent & { currentTarget: HTMLAnchorElement }) {
+		if (e.ctrlKey || e.metaKey) return;
+		const currentTarget = e.currentTarget;
+
+		if (!(currentTarget instanceof HTMLAnchorElement)) {
+			return;
+		}
+
+		e.preventDefault();
+
+		const { href } = currentTarget;
+		const result = await preloadData(href);
+
+		if (result.type === "loaded" && result.status === 200) {
+			pushState(href, {
+				updatePost: {
+					data: {
+						updatePostForm: result.data.updatePostForm,
+						postId: result.data.postId,
+					},
+					dialog: true,
+				},
+			});
+		} else {
+			// something bad happened! try navigating
+			goto(href);
+		}
+	}
+
 	// eslint-disable-next-line svelte/valid-compile
 	$page;
 </script>
@@ -55,9 +86,11 @@
 					<span class="sr-only">Post options</span>
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					<DropdownMenu.Item href="/posts/{post.id}/edit">
-						<SquarePen class="mr-2 size-4" />
-						Edit
+					<DropdownMenu.Item>
+						<a href="/posts/{post.id}/update" on:click={handleEditLinkClick}>
+							<SquarePen class="mr-2 size-4" />
+							Edit
+						</a>
 					</DropdownMenu.Item>
 					<DropdownMenu.Item
 						on:click={(e) => {
@@ -82,6 +115,15 @@
 		By: {post.user.username}
 	</Card.Footer>
 </Card.Root>
+{#if $page.state.updatePost?.dialog && $page.state.updatePost.data.postId === post.id}
+	{@const data = {
+		updatePostForm: $page.state.updatePost.data.updatePostForm,
+		postId: $page.state.updatePost.data.postId,
+		user: $page.data.user,
+		session: $page.data.session,
+	}}
+	<UpdatePostPage {data} dialog={true} />
+{/if}
 
 <AlertDialog.Root bind:open={openStates.deleteDialogOpen}>
 	<AlertDialog.Content>
