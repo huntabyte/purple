@@ -1,15 +1,15 @@
 import { loginSchema } from "$lib/zod-schemas";
 import { fail, redirect } from "@sveltejs/kit";
-import type { Actions, PageServerLoad } from "./$types";
+import type { Actions } from "./$types";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { db } from "$lib/server/db";
-import { userHashedPasswords, users } from "$lib/server/schemas";
+import { accounts, users } from "$lib/server/schemas";
 import { eq } from "drizzle-orm";
 import { Argon2id } from "oslo/password";
 import { lucia } from "$lib/server/auth";
 
-export const load: PageServerLoad = async (event) => {
+export const load = async (event) => {
 	if (event.locals.user) redirect(302, "/");
 	return {
 		form: await superValidate(zod(loginSchema)),
@@ -18,6 +18,7 @@ export const load: PageServerLoad = async (event) => {
 
 export const actions: Actions = {
 	default: async (event) => {
+		if (event.locals.user) redirect(302, "/");
 		const form = await superValidate(event, zod(loginSchema));
 
 		if (!form.valid) {
@@ -36,20 +37,13 @@ export const actions: Actions = {
 			return setError(form, "", "Invalid username or password.");
 		}
 
-		const hashedPassword = db
-			.select()
-			.from(userHashedPasswords)
-			.where(eq(userHashedPasswords.userId, existingUser.id))
-			.get();
+		const account = db.select().from(accounts).where(eq(accounts.id, existingUser.id)).get();
 
-		if (!hashedPassword) {
-			return setError(form, "", "No hashed password.");
+		if (!account) {
+			return setError(form, "", "An error occurred while logging in. Please try again.");
 		}
 
-		const validPassword = await new Argon2id().verify(
-			hashedPassword.hashed_password,
-			form.data.password
-		);
+		const validPassword = await new Argon2id().verify(account.hashedPassword, form.data.password);
 
 		if (!validPassword) {
 			return setError(form, "", "Invalid username or password.");

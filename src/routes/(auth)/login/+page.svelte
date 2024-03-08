@@ -4,6 +4,7 @@
 	import { loginSchema } from "$lib/zod-schemas.js";
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
+	import AuthPage from "../auth-page.svelte";
 
 	let { data } = $props();
 
@@ -14,7 +15,11 @@
 	const { form: formData, enhance, errors } = form;
 </script>
 
-<div class="mx-auto flex max-w-xl py-8">
+<AuthPage type="login">
+	<div class="flex flex-col space-y-2 text-center">
+		<h1 class="text-2xl font-semibold tracking-tight">Login to your account</h1>
+		<p class="text-sm text-muted-foreground">Start participating in the conversation.</p>
+	</div>
 	<form method="POST" use:enhance class="w-full space-y-4">
 		<Form.Field {form} name="username">
 			<Form.Control let:attrs>
@@ -33,4 +38,4 @@
 		<Form.Errors errors={$errors._errors} />
 		<Form.Button>Login</Form.Button>
 	</form>
-</div>
+</AuthPage>

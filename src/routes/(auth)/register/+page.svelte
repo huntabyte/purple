@@ -4,6 +4,8 @@
 	import { registerSchema } from "$lib/zod-schemas.js";
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
+	import AuthPage from "../auth-page.svelte";
+
 	let { data } = $props();
 
 	const form = superForm(data.form, {
@@ -13,7 +15,11 @@
 	const { form: formData, enhance, errors } = form;
 </script>
 
-<div class="mx-auto flex max-w-xl py-8">
+<AuthPage type="register">
+	<div class="flex flex-col space-y-2 text-center">
+		<h1 class="text-2xl font-semibold tracking-tight">Create an account</h1>
+		<p class="text-sm text-muted-foreground">Start building your digital community today.</p>
+	</div>
 	<form method="POST" use:enhance class="w-full space-y-4">
 		<Form.Field {form} name="username">
 			<Form.Control let:attrs>
@@ -29,14 +35,16 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
-		<Form.Field {form} name="passwordConfirm">
-			<Form.Control let:attrs>
-				<Form.Label>Confirm Password</Form.Label>
-				<Input type="password" {...attrs} bind:value={$formData.passwordConfirm} />
-			</Form.Control>
-			<Form.FieldErrors />
-		</Form.Field>
 		<Form.Errors errors={$errors._errors} />
-		<Form.Button>Register</Form.Button>
+		<Form.Button>Login</Form.Button>
 	</form>
-</div>
+	<p class="px-8 text-center text-sm text-muted-foreground">
+		By clicking continue, you agree to our{" "}
+		<a href="/terms" class="underline underline-offset-4 hover:text-primary">
+			Terms of Service
+		</a>{" "}
+		and{" "}
+		<a href="/privacy" class="underline underline-offset-4 hover:text-primary"> Privacy Policy </a>
+		.
+	</p>
+</AuthPage>

@@ -19,6 +19,7 @@
 		"@faker-js/faker": "^8.4.1",
 		"@lucia-auth/adapter-drizzle": "^1.0.2",
 		"@sveltejs/adapter-auto": "^3.0.0",
+		"@sveltejs/enhanced-img": "^0.1.8",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/better-sqlite3": "^7.6.9",

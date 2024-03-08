@@ -12,8 +12,8 @@ export const registerSchema = z
 	});
 
 export const loginSchema = z.object({
-	username: z.string().min(3).max(30),
-	password: z.string(),
+	username: z.string().min(1, "Please enter a username."),
+	password: z.string().min(1, "Please enter a password."),
 });
 
 export const createPostSchema = z.object({
