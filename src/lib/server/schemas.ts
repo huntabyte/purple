@@ -24,6 +24,7 @@ export const accounts = sqliteTable("account", {
 		.primaryKey()
 		.references(() => users.id),
 	hashedPassword: text("hashed_password").notNull(),
+	...timestamps,
 });
 
 export const users = sqliteTable("user", {
@@ -32,6 +33,9 @@ export const users = sqliteTable("user", {
 	...timestamps,
 });
 
+/**
+ * Sessions are used to store the user's session information.
+ */
 export const sessions = sqliteTable("session", {
 	id: text("id").notNull().primaryKey(),
 	userId: text("user_id")
