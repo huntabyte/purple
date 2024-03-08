@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from "./$types";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { db } from "$lib/server/db";
-import { users } from "$lib/server/schemas";
+import { userHashedPasswords, users } from "$lib/server/schemas";
 import { eq } from "drizzle-orm";
 import { Argon2id } from "oslo/password";
 import { lucia } from "$lib/server/auth";
@@ -36,10 +36,21 @@ export const actions: Actions = {
 			return setError(form, "", "Invalid username or password.");
 		}
 
+		const hashedPassword = db
+			.select()
+			.from(userHashedPasswords)
+			.where(eq(userHashedPasswords.userId, existingUser.id))
+			.get();
+
+		if (!hashedPassword) {
+			return setError(form, "", "No hashed password.");
+		}
+
 		const validPassword = await new Argon2id().verify(
-			existingUser.hashed_password,
+			hashedPassword.hashed_password,
 			form.data.password
 		);
+
 		if (!validPassword) {
 			return setError(form, "", "Invalid username or password.");
 		}

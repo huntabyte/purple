@@ -11,10 +11,17 @@ const timestamps = {
 		.default(sql`CURRENT_TIMESTAMP`),
 };
 
+export const userHashedPasswords = sqliteTable("user_hashed_password", {
+	id: text("id").notNull().primaryKey(),
+	hashed_password: text("hashed_password").notNull(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => users.id),
+});
+
 export const users = sqliteTable("user", {
 	id: text("id").notNull().primaryKey(),
 	username: text("username").notNull().unique(),
-	hashed_password: text("hashed_password").notNull(),
 	...timestamps,
 });
 

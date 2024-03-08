@@ -8,8 +8,8 @@ import {
 	deletePostSchema,
 	updatePostSchema,
 } from "$lib/zod-schemas";
-import { fail, redirect } from "@sveltejs/kit";
-import { posts } from "$lib/server/schemas";
+import { error, fail, redirect } from "@sveltejs/kit";
+import { comments, posts } from "$lib/server/schemas";
 import { generateId } from "lucia";
 import { eq } from "drizzle-orm";
 import { getPostById } from "$lib/server/helpers";
@@ -32,6 +32,7 @@ export const load: PageServerLoad = async () => {
 				columns: {
 					content: true,
 					id: true,
+					createdAt: true,
 				},
 				with: {
 					user: {
@@ -94,12 +95,29 @@ export const actions: Actions = {
 		if (!form.valid) return fail(400, { form });
 
 		const postId = event.url.searchParams.get("id");
-		if (!postId || !getPostById(postId, event.locals.user.id)) {
+		if (!postId || !(await getPostById(postId, event.locals.user.id))) {
 			return setError(form, "", "Unable to update post.");
 		}
 
 		await db.update(posts).set(form.data).where(eq(posts.id, postId));
 
 		return { form };
+	},
+	createComment: async (event) => {
+		if (!event.locals.user) redirect(302, "/login");
+		const form = await superValidate(event, zod(createPostCommentSchema));
+		if (!form.valid) return fail(400, { form });
+
+		const postId = event.url.searchParams.get("postId");
+		if (!postId) error(400, "Invalid postId");
+		if (await getPostById(postId, event.locals.user.id)) {
+			error(403, "You are not allowed to comment on your own post");
+		}
+
+		await db.insert(comments).values({ ...form.data, postId, userId: event.locals.user.id });
+
+		return {
+			form,
+		};
 	},
 };

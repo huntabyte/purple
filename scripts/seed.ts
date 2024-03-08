@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { db } from "../src/lib/server/db.js";
-import { posts, users } from "../src/lib/server/schemas.js";
+import { posts, userHashedPasswords, users } from "../src/lib/server/schemas.js";
 
 import { webcrypto } from "node:crypto";
 
@@ -13,10 +13,18 @@ async function createUsers() {
 		const userId = generateId(15);
 		const hashedPassword = await new Argon2id().hash("1234");
 
-		db.insert(users)
-			.values({ username: faker.internet.userName(), hashed_password: hashedPassword, id: userId })
+		const { insertedId } = db
+			.insert(users)
+			.values({ username: faker.internet.userName(), id: userId })
 			.returning({ insertedId: users.id })
 			.get();
+
+		await db.insert(userHashedPasswords).values({
+			userId: insertedId,
+			hashed_password: hashedPassword,
+			id: generateId(15),
+		});
+
 		createPosts(userId);
 	}
 }

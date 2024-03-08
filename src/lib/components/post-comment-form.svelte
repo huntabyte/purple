@@ -6,6 +6,7 @@
 	import { Textarea } from "./ui/textarea";
 	import { createPostCommentSchema } from "$lib/zod-schemas";
 	import { getPostState } from "$lib/state.svelte";
+	import { page } from "$app/stores";
 
 	const data = getPostState();
 
@@ -18,10 +19,12 @@
 	});
 
 	const { form: formData, enhance } = form;
+
+	$page; // eslint-disable-line svelte/valid-compile
 </script>
 
 {#if data.commentOpen}
-	<form action="?/createComment&postId={data.post.id}" method="POST" use:enhance>
+	<form action="?/createComment&postId={data.post.id}" method="POST" use:enhance class="w-full">
 		<Form.Field {form} name="content">
 			<Form.Control let:attrs>
 				<Form.Label>Leave a note</Form.Label>

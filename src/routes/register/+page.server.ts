@@ -3,7 +3,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { users } from "$lib/server/schemas.js";
+import { users, userHashedPasswords } from "$lib/server/schemas.js";
 import { eq } from "drizzle-orm";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
@@ -42,9 +42,15 @@ export const actions: Actions = {
 
 		const { insertedId } = db
 			.insert(users)
-			.values({ username: form.data.username, hashed_password: hashedPassword, id: userId })
+			.values({ username: form.data.username, id: userId })
 			.returning({ insertedId: users.id })
 			.get();
+
+		db.insert(userHashedPasswords).values({
+			id: insertedId,
+			hashed_password: hashedPassword,
+			userId: userId,
+		});
 
 		const session = await lucia.createSession(insertedId, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
