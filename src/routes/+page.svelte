@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CreatePostDialog, PostCard } from '$lib/components';
+	import { CreatePostDialog, PostCard } from "$lib/components";
 
 	let { data } = $props();
 </script>

@@ -1,13 +1,13 @@
 <script lang="ts">
-	import * as Form from '$lib/components/ui/form/index.js';
-	import { Input } from '$lib/components/ui/input';
-	import { registerSchema } from '$lib/zod-schemas.js';
-	import { superForm } from 'sveltekit-superforms';
-	import { zodClient } from 'sveltekit-superforms/adapters';
+	import * as Form from "$lib/components/ui/form/index.js";
+	import { Input } from "$lib/components/ui/input";
+	import { registerSchema } from "$lib/zod-schemas.js";
+	import { superForm } from "sveltekit-superforms";
+	import { zodClient } from "sveltekit-superforms/adapters";
 	let { data } = $props();
 
 	const form = superForm(data.form, {
-		validators: zodClient(registerSchema)
+		validators: zodClient(registerSchema),
 	});
 
 	const { form: formData, enhance, errors } = form;

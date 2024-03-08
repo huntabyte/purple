@@ -1,13 +1,13 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog';
-	import * as Form from '$lib/components/ui/form';
-	import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
-	import { buttonVariants } from './ui/button';
-	import { createPostSchema } from '$lib/zod-schemas';
-	import { zodClient } from 'sveltekit-superforms/adapters';
-	import { Input } from '$lib/components/ui/input';
-	import { Textarea } from '$lib/components/ui/textarea';
-	import { toast } from 'svelte-sonner';
+	import * as Dialog from "$lib/components/ui/dialog";
+	import * as Form from "$lib/components/ui/form";
+	import { superForm, type Infer, type SuperValidated } from "sveltekit-superforms";
+	import { buttonVariants } from "./ui/button";
+	import { createPostSchema } from "$lib/zod-schemas";
+	import { zodClient } from "sveltekit-superforms/adapters";
+	import { Input } from "$lib/components/ui/input";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import { toast } from "svelte-sonner";
 
 	type Props = {
 		form: SuperValidated<Infer<typeof createPostSchema>>;
@@ -23,9 +23,9 @@
 			if (!updForm.valid) return;
 
 			// success, show toast and close dialog
-			toast.success('Post created successfully');
+			toast.success("Post created successfully");
 			open = false;
-		}
+		},
 	});
 
 	const { form: createPostFormData, enhance } = form;

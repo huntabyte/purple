@@ -1,18 +1,18 @@
-import { loginSchema } from '$lib/zod-schemas';
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
-import { setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { db } from '$lib/server/db';
-import { users } from '$lib/server/schemas';
-import { eq } from 'drizzle-orm';
-import { Argon2id } from 'oslo/password';
-import { lucia } from '$lib/server/auth';
+import { loginSchema } from "$lib/zod-schemas";
+import { fail, redirect } from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from "./$types";
+import { setError, superValidate } from "sveltekit-superforms";
+import { zod } from "sveltekit-superforms/adapters";
+import { db } from "$lib/server/db";
+import { users } from "$lib/server/schemas";
+import { eq } from "drizzle-orm";
+import { Argon2id } from "oslo/password";
+import { lucia } from "$lib/server/auth";
 
 export const load: PageServerLoad = async (event) => {
-	if (event.locals.user) redirect(302, '/');
+	if (event.locals.user) redirect(302, "/");
 	return {
-		form: await superValidate(zod(loginSchema))
+		form: await superValidate(zod(loginSchema)),
 	};
 };
 
@@ -22,7 +22,7 @@ export const actions: Actions = {
 
 		if (!form.valid) {
 			return fail(400, {
-				form
+				form,
 			});
 		}
 
@@ -33,7 +33,7 @@ export const actions: Actions = {
 			.get();
 
 		if (!existingUser) {
-			return setError(form, '', 'Invalid username or password.');
+			return setError(form, "", "Invalid username or password.");
 		}
 
 		const validPassword = await new Argon2id().verify(
@@ -41,16 +41,16 @@ export const actions: Actions = {
 			form.data.password
 		);
 		if (!validPassword) {
-			return setError(form, '', 'Invalid username or password.');
+			return setError(form, "", "Invalid username or password.");
 		}
 
 		const session = await lucia.createSession(existingUser.id, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
+			path: ".",
+			...sessionCookie.attributes,
 		});
 
-		redirect(302, '/');
-	}
+		redirect(302, "/");
+	},
 };

@@ -1,19 +1,19 @@
-import { registerSchema } from '$lib/zod-schemas';
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
-import { setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { users } from '$lib/server/schemas.js';
-import { eq } from 'drizzle-orm';
-import { generateId } from 'lucia';
-import { Argon2id } from 'oslo/password';
-import { lucia } from '$lib/server/auth';
-import { db } from '$lib/server/db';
+import { registerSchema } from "$lib/zod-schemas";
+import { fail, redirect } from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from "./$types";
+import { setError, superValidate } from "sveltekit-superforms";
+import { zod } from "sveltekit-superforms/adapters";
+import { users } from "$lib/server/schemas.js";
+import { eq } from "drizzle-orm";
+import { generateId } from "lucia";
+import { Argon2id } from "oslo/password";
+import { lucia } from "$lib/server/auth";
+import { db } from "$lib/server/db";
 
 export const load: PageServerLoad = async (event) => {
-	if (event.locals.user) redirect(302, '/');
+	if (event.locals.user) redirect(302, "/");
 	return {
-		form: await superValidate(zod(registerSchema))
+		form: await superValidate(zod(registerSchema)),
 	};
 };
 
@@ -21,9 +21,9 @@ export const actions: Actions = {
 	default: async (event) => {
 		const form = await superValidate(event, zod(registerSchema));
 		if (!form.valid) {
-			console.log('form', form);
+			console.log("form", form);
 			return fail(400, {
-				form
+				form,
 			});
 		}
 
@@ -34,7 +34,7 @@ export const actions: Actions = {
 			.get();
 
 		if (userExists) {
-			return setError(form, 'username', 'Username already exists.');
+			return setError(form, "username", "Username already exists.");
 		}
 
 		const userId = generateId(15);
@@ -49,10 +49,10 @@ export const actions: Actions = {
 		const session = await lucia.createSession(insertedId, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
-			...sessionCookie.attributes
+			path: ".",
+			...sessionCookie.attributes,
 		});
 
-		redirect(302, '/login');
-	}
+		redirect(302, "/login");
+	},
 };
