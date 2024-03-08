@@ -11,12 +11,19 @@ const timestamps = {
 		.default(sql`CURRENT_TIMESTAMP`),
 };
 
-export const userHashedPasswords = sqliteTable("user_hashed_password", {
-	id: text("id").notNull().primaryKey(),
-	hashed_password: text("hashed_password").notNull(),
-	userId: text("user_id")
+/**
+ * The `accounts` table is used to store the user's more sensitive account
+ * information, such as their email, phone, address, billing information, etc.
+ *
+ * We separate this from the `users` table to avoid accidentally leaking sensitive
+ * information when querying the `users` table for general user information.
+ */
+export const accounts = sqliteTable("account", {
+	id: text("id")
 		.notNull()
+		.primaryKey()
 		.references(() => users.id),
+	hashedPassword: text("hashed_password").notNull(),
 });
 
 export const users = sqliteTable("user", {
@@ -40,7 +47,7 @@ export const posts = sqliteTable("post", {
 		.$defaultFn(() => generateId(15)),
 	userId: text("user_id")
 		.notNull()
-		.references(() => users.id),
+		.references(() => users.id, { onDelete: "cascade" }),
 	title: text("title").notNull(),
 	content: text("content").notNull(),
 	...timestamps,
@@ -54,8 +61,8 @@ export const comments = sqliteTable("comment", {
 	content: text("content").notNull(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => users.id),
-	postId: text("post_id").references(() => posts.id),
+		.references(() => users.id, { onDelete: "cascade" }),
+	postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
 	...timestamps,
 });
 

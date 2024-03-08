@@ -1,13 +1,15 @@
 <script lang="ts">
-	import type { Comment } from "$lib/server/schemas";
+	import type { Comment, User } from "$lib/server/schemas";
 
 	type Props = {
-		comment: {
-			id: string;
+		comment: Comment & {
+			user: User;
 		};
 	};
 
 	let { comment } = $props<Props>();
 </script>
 
-<div class="flex items-center"></div>
+<div class="flex items-center">
+	{comment.content}
+</div>
