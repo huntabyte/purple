@@ -7,7 +7,7 @@
 		type: "login" | "register";
 	};
 
-	let { type, children } = $props<Props>();
+	let { type, children }: Props = $props();
 
 	type Link = {
 		text: string;

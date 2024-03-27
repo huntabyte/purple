@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { errors = [] } = $props<{ errors?: string[] }>();
+	let { errors = [] }: { errors?: string[] } = $props();
 </script>
 
 <div class="text-destructive" aria-live="assertive">

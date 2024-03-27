@@ -13,7 +13,7 @@
 		form: SuperValidated<Infer<typeof createPostSchema>>;
 	};
 
-	let { form: theForm } = $props<Props>();
+	let { form: theForm }: Props = $props();
 
 	let open = $state(false);
 

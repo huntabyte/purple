@@ -10,7 +10,7 @@
 	import Trash from "lucide-svelte/icons/trash";
 	import SquarePen from "lucide-svelte/icons/square-pen";
 	import { buttonVariants } from "./ui/button";
-	import SuperDebug, { type SuperValidated, type Infer } from "sveltekit-superforms";
+	import type { SuperValidated, Infer } from "sveltekit-superforms";
 	import { createPostCommentSchema, deletePostSchema, updatePostSchema } from "$lib/zod-schemas";
 	import { sleep } from "$lib/utils";
 	import { setPostState } from "$lib/state.svelte";
@@ -26,15 +26,13 @@
 		createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
 	};
 
-	let { post, deletePostForm, updatePostForm, createCommentForm } = $props<Props>();
+	let { post, deletePostForm, updatePostForm, createCommentForm }: Props = $props();
 
 	const data = setPostState({ post, deletePostForm, updatePostForm, createCommentForm });
 
 	// eslint-disable-next-line svelte/valid-compile
 	$page;
 </script>
-
-<SuperDebug data={post} />
 
 <Card.Root>
 	<Card.Header class="flex-row items-center justify-between">

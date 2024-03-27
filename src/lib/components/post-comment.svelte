@@ -7,7 +7,7 @@
 		};
 	};
 
-	let { comment } = $props<Props>();
+	let { comment }: Props = $props();
 </script>
 
 <div class="flex items-center">
