@@ -1,6 +1,11 @@
 import type { Infer, SuperValidated } from "sveltekit-superforms";
 import type { PostWithRelations } from "./server/schemas";
-import type { createPostCommentSchema, deletePostSchema, updatePostSchema } from "./zod-schemas";
+import type {
+	createLikeSchema,
+	createPostCommentSchema,
+	deletePostSchema,
+	updatePostSchema,
+} from "./zod-schemas";
 import { getContext, setContext } from "svelte";
 
 export class Ref<T> {
@@ -16,30 +21,28 @@ export function ref<T>(initialValue: T) {
 }
 
 type SetPostState = {
-	post: PostWithRelations;
+	post: PostWithRelations & { userLiked: boolean };
 	deletePostForm: SuperValidated<Infer<typeof deletePostSchema>>;
 	updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 	createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
+	createLikeForm: SuperValidated<Infer<typeof createLikeSchema>>;
 };
 export class PostState {
-	deletePostForm: SuperValidated<Infer<typeof deletePostSchema>> = $state() as SuperValidated<
-		Infer<typeof deletePostSchema>
-	>;
-	updatePostForm: SuperValidated<Infer<typeof updatePostSchema>> = $state() as SuperValidated<
-		Infer<typeof updatePostSchema>
-	>;
-	createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>> =
-		$state() as SuperValidated<Infer<typeof createPostCommentSchema>>;
+	deletePostForm = $state() as SuperValidated<Infer<typeof deletePostSchema>>;
+	updatePostForm = $state() as SuperValidated<Infer<typeof updatePostSchema>>;
+	createCommentForm = $state() as SuperValidated<Infer<typeof createPostCommentSchema>>;
+	createLikeForm = $state() as SuperValidated<Infer<typeof createLikeSchema>>;
 	deleteOpen = $state(false);
 	dropdownOpen = $state(false);
 	updateOpen = $state(false);
 	commentOpen = $state(false);
-	post: PostWithRelations = $state() as PostWithRelations;
+	post: PostWithRelations = $state() as PostWithRelations & { userLiked: boolean };
 
 	constructor(init: SetPostState) {
 		this.deletePostForm = init.deletePostForm;
 		this.updatePostForm = init.updatePostForm;
 		this.createCommentForm = init.createCommentForm;
+		this.createLikeForm = init.createLikeForm;
 		this.post = init.post;
 	}
 }

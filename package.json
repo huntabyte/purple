@@ -29,6 +29,7 @@
 		"autoprefixer": "^10.4.16",
 		"better-sqlite3": "^9.4.3",
 		"drizzle-kit": "^0.20.14",
+		"drizzle-orm": "^0.30.5",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "2.36.0-next.10",
@@ -53,7 +54,6 @@
 	"dependencies": {
 		"bits-ui": "^0.19.5",
 		"clsx": "^2.1.0",
-		"drizzle-orm": "^0.29.5",
 		"formsnap": "^0.5.1",
 		"lucide-svelte": "^0.344.0",
 		"mode-watcher": "^0.2.2",

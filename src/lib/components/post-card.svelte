@@ -7,27 +7,39 @@
 	import Trash from "lucide-svelte/icons/trash";
 	import SquarePen from "lucide-svelte/icons/square-pen";
 	import MessageCircle from "lucide-svelte/icons/message-circle";
-	import Heart from "lucide-svelte/icons/heart";
 	import { buttonVariants } from "./ui/button";
 	import type { SuperValidated, Infer } from "sveltekit-superforms";
-	import { createPostCommentSchema, deletePostSchema, updatePostSchema } from "$lib/zod-schemas";
+	import {
+		createLikeSchema,
+		createPostCommentSchema,
+		deletePostSchema,
+		updatePostSchema,
+	} from "$lib/zod-schemas";
 	import { sleep } from "$lib/utils";
 	import { setPostState } from "$lib/state.svelte";
 	import { page } from "$app/stores";
 	import PostCommentForm from "./post-comment-form.svelte";
 	import PostUpdateDialog from "./post-update-dialog.svelte";
 	import PostDeleteDialog from "./post-delete-dialog.svelte";
+	import PostLikeForm from "./post-like-form.svelte";
 
 	type Props = {
-		post: PostWithRelations;
+		post: PostWithRelations & { userLiked: boolean };
 		deletePostForm: SuperValidated<Infer<typeof deletePostSchema>>;
 		updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 		createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
+		createLikeForm: SuperValidated<Infer<typeof createLikeSchema>>;
 	};
 
-	let { post, deletePostForm, updatePostForm, createCommentForm }: Props = $props();
+	let { post, deletePostForm, updatePostForm, createCommentForm, createLikeForm }: Props = $props();
 
-	const data = setPostState({ post, deletePostForm, updatePostForm, createCommentForm });
+	const data = setPostState({
+		post,
+		deletePostForm,
+		updatePostForm,
+		createCommentForm,
+		createLikeForm,
+	});
 
 	// eslint-disable-next-line svelte/valid-compile
 	$page;
@@ -41,6 +53,7 @@
 			</Avatar.Fallback>
 		</Avatar.Root>
 		<span class="text-sm font-medium">{post.user.username}</span>
+		<span>user liked: {post.userLiked}</span>
 	</div>
 	{#if $page.data.user && $page.data.user.id === post.userId}
 		<DropdownMenu.Root bind:open={data.dropdownOpen}>
@@ -88,15 +101,13 @@
 				variant="ghost"
 				size="icon"
 				class="gap-1"
+				type="button"
 				onclick={() => (data.commentOpen = !data.commentOpen)}
 			>
 				<MessageCircle class="size-4" />
 				{post.comments.length}
 			</Button>
-			<Button variant="ghost" size="icon" class="gap-1">
-				<Heart class="size-4" />
-				{post.likes.length}
-			</Button>
+			<PostLikeForm />
 		</div>
 		<span>{post.createdAt}</span>
 	</div>

@@ -18,6 +18,7 @@
 			updatePostForm={data.updatePostForm}
 			deletePostForm={data.deletePostForm}
 			createCommentForm={data.createCommentForm}
+			createLikeForm={data.createLikeForm}
 		/>
 	{/each}
 </div>

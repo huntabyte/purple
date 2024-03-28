@@ -45,3 +45,11 @@ export const updatePostSchema = z.object({
 export const createPostCommentSchema = z.object({
 	content: z.string().min(1).max(512),
 });
+
+export const createLikeSchema = z.object({
+	postId: z.string(),
+});
+
+export const deleteLikeSchema = z.object({
+	likeId: z.string(),
+});
