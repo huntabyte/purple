@@ -21,8 +21,21 @@
 </script>
 
 <form method="POST" action="/?/createLike&postId={post.id}" use:enhance>
-	<Button variant="ghost" size="icon" class="gap-1" type="submit">
-		<Heart class="size-4" />
-		{post.likes.length}
-	</Button>
+	{#if post.userLiked}
+		<Button
+			variant="ghost"
+			size="icon"
+			class="gap-1"
+			type="submit"
+			formaction="/?/deleteLike&postId={post.id}"
+		>
+			<Heart class="size-4 text-rose-500" />
+			{post.likes.length}
+		</Button>
+	{:else}
+		<Button variant="ghost" size="icon" class="gap-1" type="submit">
+			<Heart class="size-4" />
+			{post.likes.length}
+		</Button>
+	{/if}
 </form>

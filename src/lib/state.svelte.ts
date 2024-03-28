@@ -21,7 +21,7 @@ export function ref<T>(initialValue: T) {
 }
 
 type SetPostState = {
-	post: PostWithRelations & { userLiked: boolean };
+	post: PostWithRelations & { userLiked: number };
 	deletePostForm: SuperValidated<Infer<typeof deletePostSchema>>;
 	updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 	createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
@@ -36,7 +36,7 @@ export class PostState {
 	dropdownOpen = $state(false);
 	updateOpen = $state(false);
 	commentOpen = $state(false);
-	post: PostWithRelations = $state() as PostWithRelations & { userLiked: boolean };
+	post = $state() as PostWithRelations & { userLiked: number };
 
 	constructor(init: SetPostState) {
 		this.deletePostForm = init.deletePostForm;

@@ -24,7 +24,7 @@
 	import PostLikeForm from "./post-like-form.svelte";
 
 	type Props = {
-		post: PostWithRelations & { userLiked: boolean };
+		post: PostWithRelations & { userLiked: number };
 		deletePostForm: SuperValidated<Infer<typeof deletePostSchema>>;
 		updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 		createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
@@ -53,7 +53,6 @@
 			</Avatar.Fallback>
 		</Avatar.Root>
 		<span class="text-sm font-medium">{post.user.username}</span>
-		<span>user liked: {post.userLiked}</span>
 	</div>
 	{#if $page.data.user && $page.data.user.id === post.userId}
 		<DropdownMenu.Root bind:open={data.dropdownOpen}>
