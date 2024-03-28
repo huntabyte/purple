@@ -3,7 +3,7 @@ import { fail, redirect, type RequestEvent } from "@sveltejs/kit";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { db } from "./db";
-import { likes } from "./schemas";
+import { likesTable } from "./schemas";
 import { eq } from "drizzle-orm";
 
 export async function createLikeAction(event: RequestEvent) {
@@ -18,7 +18,7 @@ export async function createLikeAction(event: RequestEvent) {
 	}
 
 	try {
-		await db.insert(likes).values({
+		await db.insert(likesTable).values({
 			postId: form.data.postId,
 			userId: event.locals.user.id,
 		});
@@ -43,7 +43,7 @@ export async function deleteLikeAction(event: RequestEvent) {
 	}
 
 	try {
-		await db.delete(likes).where(eq(likes.id, form.data.likeId));
+		await db.delete(likesTable).where(eq(likesTable.id, form.data.likeId));
 	} catch {
 		setError(form, "", "An error occurred while unliking the post. Please try again later.");
 	}

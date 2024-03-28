@@ -4,7 +4,7 @@ import type { Actions } from "./$types";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { db } from "$lib/server/db";
-import { accounts, users } from "$lib/server/schemas";
+import { accountsTable, usersTable } from "$lib/server/schemas";
 import { eq } from "drizzle-orm";
 import { Argon2id } from "oslo/password";
 import { lucia } from "$lib/server/auth";
@@ -29,15 +29,19 @@ export const actions: Actions = {
 
 		const existingUser = db
 			.select()
-			.from(users)
-			.where(eq(users.username, form.data.username))
+			.from(usersTable)
+			.where(eq(usersTable.username, form.data.username))
 			.get();
 
 		if (!existingUser) {
 			return setError(form, "", "Invalid username or password.");
 		}
 
-		const account = db.select().from(accounts).where(eq(accounts.id, existingUser.id)).get();
+		const account = db
+			.select()
+			.from(accountsTable)
+			.where(eq(accountsTable.id, existingUser.id))
+			.get();
 
 		if (!account) {
 			return setError(form, "", "An error occurred while logging in. Please try again.");

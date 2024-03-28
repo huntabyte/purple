@@ -6,7 +6,7 @@ import { updatePostSchema } from "$lib/zod-schemas";
 import { z } from "zod";
 import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { posts } from "$lib/server/schemas";
+import { postsTable } from "$lib/server/schemas";
 import { eq } from "drizzle-orm";
 
 export const load = async (event) => {
@@ -46,9 +46,9 @@ export const actions: Actions = {
 		if (!form.valid) return fail(400, { form });
 
 		await db
-			.update(posts)
+			.update(postsTable)
 			.set({ title: form.data.title, content: form.data.content })
-			.where(eq(posts.id, event.params.id));
+			.where(eq(postsTable.id, event.params.id));
 
 		return { form };
 	},

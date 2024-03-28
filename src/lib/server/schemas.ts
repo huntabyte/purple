@@ -18,16 +18,16 @@ const timestamps = {
  * We separate this from the `users` table to avoid accidentally leaking sensitive
  * information when querying the `users` table for general user information.
  */
-export const accounts = sqliteTable("account", {
+export const accountsTable = sqliteTable("account", {
 	id: text("id")
 		.notNull()
 		.primaryKey()
-		.references(() => users.id),
+		.references(() => usersTable.id),
 	hashedPassword: text("hashed_password").notNull(),
 	...timestamps,
 });
 
-export const users = sqliteTable("user", {
+export const usersTable = sqliteTable("user", {
 	id: text("id").notNull().primaryKey(),
 	username: text("username").notNull().unique(),
 	...timestamps,
@@ -36,28 +36,28 @@ export const users = sqliteTable("user", {
 /**
  * Sessions are used to store the user's session information.
  */
-export const sessions = sqliteTable("session", {
+export const sessionsTable = sqliteTable("session", {
 	id: text("id").notNull().primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => users.id),
+		.references(() => usersTable.id),
 	expiresAt: integer("expires_at").notNull(),
 });
 
-export const posts = sqliteTable("post", {
+export const postsTable = sqliteTable("post", {
 	id: text("id")
 		.notNull()
 		.primaryKey()
 		.$defaultFn(() => generateId(15)),
 	userId: text("user_id")
 		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
+		.references(() => usersTable.id, { onDelete: "cascade" }),
 	title: text("title").notNull(),
 	content: text("content").notNull(),
 	...timestamps,
 });
 
-export const comments = sqliteTable("comment", {
+export const commentsTable = sqliteTable("comment", {
 	id: text("id")
 		.notNull()
 		.primaryKey()
@@ -65,64 +65,64 @@ export const comments = sqliteTable("comment", {
 	content: text("content").notNull(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
-	postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
+		.references(() => usersTable.id, { onDelete: "cascade" }),
+	postId: text("post_id").references(() => postsTable.id, { onDelete: "cascade" }),
 	...timestamps,
 });
 
-export const likes = sqliteTable("like", {
+export const likesTable = sqliteTable("like", {
 	id: text("id")
 		.notNull()
 		.primaryKey()
 		.$defaultFn(() => generateId(15)),
 	userId: text("user_id")
 		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
-	postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
+		.references(() => usersTable.id, { onDelete: "cascade" }),
+	postId: text("post_id").references(() => postsTable.id, { onDelete: "cascade" }),
 	...timestamps,
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
-	posts: many(posts),
-	comments: many(comments),
-	likes: many(likes),
+export const usersRelations = relations(usersTable, ({ many }) => ({
+	posts: many(postsTable),
+	comments: many(commentsTable),
+	likes: many(likesTable),
 }));
 
-export const postsRelations = relations(posts, ({ one, many }) => ({
-	user: one(users, {
-		fields: [posts.userId],
-		references: [users.id],
+export const postsRelations = relations(postsTable, ({ one, many }) => ({
+	user: one(usersTable, {
+		fields: [postsTable.userId],
+		references: [usersTable.id],
 	}),
-	comments: many(comments),
-	likes: many(likes),
+	comments: many(commentsTable),
+	likes: many(likesTable),
 }));
 
-export const commentsRelations = relations(comments, ({ one }) => ({
-	user: one(users, {
-		fields: [comments.userId],
-		references: [users.id],
+export const commentsRelations = relations(commentsTable, ({ one }) => ({
+	user: one(usersTable, {
+		fields: [commentsTable.userId],
+		references: [usersTable.id],
 	}),
-	post: one(posts, {
-		fields: [comments.postId],
-		references: [posts.id],
-	}),
-}));
-
-export const likesRelations = relations(likes, ({ one }) => ({
-	user: one(users, {
-		fields: [likes.userId],
-		references: [users.id],
-	}),
-	post: one(posts, {
-		fields: [likes.postId],
-		references: [posts.id],
+	post: one(postsTable, {
+		fields: [commentsTable.postId],
+		references: [postsTable.id],
 	}),
 }));
 
-export type User = InferSelectModel<typeof users>;
-export type Like = InferSelectModel<typeof likes>;
-export type Post = InferSelectModel<typeof posts>;
-export type Comment = InferSelectModel<typeof comments>;
+export const likesRelations = relations(likesTable, ({ one }) => ({
+	user: one(usersTable, {
+		fields: [likesTable.userId],
+		references: [usersTable.id],
+	}),
+	post: one(postsTable, {
+		fields: [likesTable.postId],
+		references: [postsTable.id],
+	}),
+}));
+
+export type User = InferSelectModel<typeof usersTable>;
+export type Like = InferSelectModel<typeof likesTable>;
+export type Post = InferSelectModel<typeof postsTable>;
+export type Comment = InferSelectModel<typeof commentsTable>;
 
 export type UserWithPosts = User & {
 	posts: Post[];

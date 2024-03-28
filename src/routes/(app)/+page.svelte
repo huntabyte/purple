@@ -11,7 +11,7 @@
 		You need to be logged in to create a post <a href="/login" class="underline">Login now</a>
 	</p>
 {/if}
-<div class="flex flex-col gap-4">
+<div class="flex flex-col gap-6">
 	{#each data.posts as post (post.id)}
 		<PostCard
 			{post}

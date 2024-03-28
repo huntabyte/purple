@@ -2,7 +2,7 @@ import { registerSchema } from "$lib/zod-schemas";
 import { fail, redirect } from "@sveltejs/kit";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { users, accounts } from "$lib/server/schemas.js";
+import { usersTable, accountsTable } from "$lib/server/schemas.js";
 import { eq } from "drizzle-orm";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
@@ -28,9 +28,9 @@ export const actions = {
 		}
 
 		const userExists = db
-			.select({ username: users.username })
-			.from(users)
-			.where(eq(users.username, form.data.username))
+			.select({ username: usersTable.username })
+			.from(usersTable)
+			.where(eq(usersTable.username, form.data.username))
 			.get();
 
 		if (userExists) {
@@ -41,12 +41,12 @@ export const actions = {
 		const hashedPassword = await new Argon2id().hash(form.data.password);
 
 		const { id } = db
-			.insert(users)
+			.insert(usersTable)
 			.values({ username: form.data.username, id: userId })
-			.returning({ id: users.id })
+			.returning({ id: usersTable.id })
 			.get();
 
-		db.insert(accounts).values({
+		db.insert(accountsTable).values({
 			id,
 			hashedPassword,
 		});

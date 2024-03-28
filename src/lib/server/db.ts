@@ -10,4 +10,4 @@ export const db = drizzle(sqlite, { schema });
 
 export type Database = typeof db;
 
-export const adapter = new DrizzleSQLiteAdapter(db, schema.sessions, schema.users);
+export const adapter = new DrizzleSQLiteAdapter(db, schema.sessionsTable, schema.usersTable);

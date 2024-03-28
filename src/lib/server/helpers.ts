@@ -1,10 +1,10 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "./db";
-import { posts } from "./schemas";
+import { postsTable } from "./schemas";
 
 export async function getPostById(postId: string) {
-	const post = await db.query.posts.findFirst({
-		where: and(eq(posts.id, postId)),
+	return await db.query.postsTable.findFirst({
+		where: and(eq(postsTable.id, postId)),
 		with: {
 			user: true,
 			comments: {
@@ -19,6 +19,4 @@ export async function getPostById(postId: string) {
 			},
 		},
 	});
-
-	return post;
 }

@@ -45,72 +45,74 @@
 	$page;
 </script>
 
-<div class="flex items-center justify-between">
-	<div class="flex items-center gap-2">
-		<Avatar.Root>
-			<Avatar.Fallback class="uppercase">
-				{post.user.username.slice(0, 2)}
-			</Avatar.Fallback>
-		</Avatar.Root>
-		<span class="text-sm font-medium">{post.user.username}</span>
-	</div>
-	{#if $page.data.user && $page.data.user.id === post.userId}
-		<DropdownMenu.Root bind:open={data.dropdownOpen}>
-			<DropdownMenu.Trigger class={buttonVariants({ size: "icon", variant: "ghost" })}>
-				<MoreVertical class="size-4" />
-				<span class="sr-only">Post options</span>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Item
-					on:click={(e) => {
-						e.preventDefault();
-						data.dropdownOpen = false;
-						sleep(2).then(() => {
-							data.updateOpen = true;
-						});
-					}}
-				>
-					<SquarePen class="mr-2 size-4" />
-					Edit
-				</DropdownMenu.Item>
-				<DropdownMenu.Item
-					on:click={(e) => {
-						e.preventDefault();
-						data.dropdownOpen = false;
-						sleep(2).then(() => {
-							data.deleteOpen = true;
-						});
-					}}
-				>
-					<Trash class="mr-2 size-4" />
-					Delete
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
-	{/if}
-</div>
-<div class="flex flex-col">
-	<div>
-		<a href="/posts/{post.id}" class="mb-2 text-2xl font-medium">{post.title}</a>
-		<p>{post.content}</p>
-	</div>
-	<div class="flex w-full items-center justify-between">
-		<div class="flex items-center gap-1">
-			<Button
-				variant="ghost"
-				size="icon"
-				class="gap-1"
-				type="button"
-				onclick={() => (data.commentOpen = !data.commentOpen)}
-			>
-				<MessageCircle class="size-4" />
-				{post.comments.length}
-			</Button>
-			<PostLikeForm />
+<div class="flex flex-col rounded-lg border p-4">
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-2">
+			<Avatar.Root>
+				<Avatar.Fallback class="uppercase">
+					{post.user.username.slice(0, 2)}
+				</Avatar.Fallback>
+			</Avatar.Root>
+			<span class="text-sm font-medium">{post.user.username}</span>
 		</div>
-		<span>{post.createdAt}</span>
+		{#if $page.data.user && $page.data.user.id === post.userId}
+			<DropdownMenu.Root bind:open={data.dropdownOpen}>
+				<DropdownMenu.Trigger class={buttonVariants({ size: "icon", variant: "ghost" })}>
+					<MoreVertical class="size-4" />
+					<span class="sr-only">Post options</span>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<DropdownMenu.Item
+						on:click={(e) => {
+							e.preventDefault();
+							data.dropdownOpen = false;
+							sleep(2).then(() => {
+								data.updateOpen = true;
+							});
+						}}
+					>
+						<SquarePen class="mr-2 size-4" />
+						Edit
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						on:click={(e) => {
+							e.preventDefault();
+							data.dropdownOpen = false;
+							sleep(2).then(() => {
+								data.deleteOpen = true;
+							});
+						}}
+					>
+						<Trash class="mr-2 size-4" />
+						Delete
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		{/if}
 	</div>
-	<PostCommentForm />
+	<div class="flex flex-col">
+		<div>
+			<a href="/posts/{post.id}" class="mb-2 text-2xl font-medium">{post.title}</a>
+			<p>{post.content}</p>
+		</div>
+		<div class="flex w-full items-center justify-between">
+			<div class="flex items-center gap-1">
+				<Button
+					variant="ghost"
+					size="icon"
+					class="gap-1"
+					type="button"
+					onclick={() => (data.commentOpen = !data.commentOpen)}
+				>
+					<MessageCircle class="size-4" />
+					{post.comments.length}
+				</Button>
+				<PostLikeForm />
+			</div>
+			<span>{post.createdAt}</span>
+		</div>
+		<PostCommentForm />
+	</div>
 </div>
 
 <PostUpdateDialog />

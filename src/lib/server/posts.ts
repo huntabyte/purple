@@ -4,7 +4,7 @@ import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { getPostById } from "./helpers";
 import { db } from "./db";
-import { posts } from "./schemas";
+import { postsTable } from "./schemas";
 import { eq } from "drizzle-orm";
 import { generateId } from "lucia";
 
@@ -25,7 +25,7 @@ export async function deletePostAction(event: RequestEvent) {
 		error(401, "You are not allowed to delete this post.");
 	}
 
-	await db.delete(posts).where(eq(posts.id, form.data.id));
+	await db.delete(postsTable).where(eq(postsTable.id, form.data.id));
 
 	return {
 		deletePostForm: form,
@@ -45,7 +45,7 @@ export async function updatePostAction(event: RequestEvent) {
 		error(401, "You are not allowed to delete this post.");
 	}
 
-	await db.update(posts).set(form.data).where(eq(posts.id, postId));
+	await db.update(postsTable).set(form.data).where(eq(postsTable.id, postId));
 
 	return { updatePostForm: form };
 }
@@ -61,7 +61,7 @@ export async function createPostAction(event: RequestEvent) {
 	const postId = generateId(15);
 
 	// create post in db
-	await db.insert(posts).values({ id: postId, ...form.data, userId: event.locals.user.id });
+	await db.insert(postsTable).values({ id: postId, ...form.data, userId: event.locals.user.id });
 
 	return { createPostForm: form };
 }

@@ -4,7 +4,7 @@ import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { getPostById } from "./helpers";
 import { db } from "./db";
-import { comments } from "./schemas";
+import { commentsTable } from "./schemas";
 
 export async function createCommentAction(event: RequestEvent) {
 	if (!event.locals.user) redirect(302, "/login");
@@ -20,7 +20,7 @@ export async function createCommentAction(event: RequestEvent) {
 
 	if (!post) error(400, "Invalid post");
 
-	await db.insert(comments).values({ ...form.data, postId, userId: event.locals.user.id });
+	await db.insert(commentsTable).values({ ...form.data, postId, userId: event.locals.user.id });
 
 	return {
 		createCommentForm: form,

@@ -10,11 +10,10 @@ import {
 	deletePostSchema,
 	updatePostSchema,
 } from "$lib/zod-schemas";
-
 import { createPostAction, deletePostAction, updatePostAction } from "$lib/server/posts";
 import { createCommentAction } from "$lib/server/comments";
 import { createLikeAction, deleteLikeAction } from "$lib/server/likes";
-import { likes, sqliteDialect } from "$lib/server/schemas";
+import { likesTable, sqliteDialect } from "$lib/server/schemas";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 import { SQL, sql } from "drizzle-orm";
 
@@ -25,6 +24,7 @@ type CountRelationParams<T> = {
 	refId2: SQLiteColumn;
 	id: string;
 };
+
 const countRelation = <const T extends string>({
 	name,
 	fieldId,
@@ -43,7 +43,7 @@ const countRelation = <const T extends string>({
 export const load: PageServerLoad = async (event) => {
 	const userId = event.locals.user ? event.locals.user.id : "notarealid";
 	async function getPosts() {
-		return await db.query.posts.findMany({
+		return await db.query.postsTable.findMany({
 			orderBy: (posts, { desc }) => [desc(posts.createdAt)],
 			with: {
 				user: true,
@@ -62,8 +62,8 @@ export const load: PageServerLoad = async (event) => {
 				...countRelation({
 					name: "userLiked",
 					fieldId: fields.id,
-					refId: likes.postId,
-					refId2: likes.userId,
+					refId: likesTable.postId,
+					refId2: likesTable.userId,
 					id: userId,
 				}),
 			}),
