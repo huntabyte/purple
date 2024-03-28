@@ -1,11 +1,5 @@
-import { relations, SQL, sql, type InferSelectModel } from "drizzle-orm";
-import {
-	text,
-	integer,
-	sqliteTable,
-	SQLiteAsyncDialect,
-	SQLiteColumn,
-} from "drizzle-orm/sqlite-core";
+import { relations, sql, type InferSelectModel } from "drizzle-orm";
+import { text, integer, sqliteTable, SQLiteAsyncDialect } from "drizzle-orm/sqlite-core";
 import { generateId } from "lucia";
 
 const timestamps = {
@@ -156,27 +150,3 @@ export type PostWithRelations = Post & {
 };
 
 export const sqliteDialect = new SQLiteAsyncDialect();
-/**
- * @example
- * db.query.locations.findFirst({
- *  extras: (fields) => {
- *     return {
- *      ...countRelation("equipmentCount", fields.id, equipmentLocations.locationId),
- *     };
- *   },
- * };
- */
-export const countRelation = <const T extends string>(
-	name: T,
-	fieldId: SQLiteColumn,
-	refId: SQLiteColumn,
-	refId2: SQLiteColumn,
-	id: string
-): { [Key in T]: SQL.Aliased<number> } => {
-	const sqlChunks = sql`(SELECT COUNT(*) FROM ${refId.table} WHERE ${refId} = ${fieldId} AND ${refId2} = '${sql.raw(id)}')`;
-	const rawSQL = sql.raw(sqliteDialect.sqlToQuery(sqlChunks).sql);
-
-	return {
-		[name]: rawSQL.mapWith(Number).as(name),
-	} as { [Key in T]: SQL.Aliased<number> };
-};

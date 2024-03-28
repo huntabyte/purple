@@ -13,8 +13,4 @@ export const mockUserData: MockUser[] = [
 	{ name: "Alex Johnson", username: "alexj" },
 	{ name: "Emily Taylor", username: "emilyt" },
 	{ name: "Daniel Martinez", username: "danm" },
-	{ name: "Sophia Garcia", username: "sophiag" },
-	{ name: "William Wilson", username: "willw" },
-	{ name: "Emma Anderson", username: "emmaa" },
-	{ name: "Olivia Wright", username: "oliviaw" },
 ];

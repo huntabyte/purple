@@ -14,7 +14,31 @@ import {
 import { createPostAction, deletePostAction, updatePostAction } from "$lib/server/posts";
 import { createCommentAction } from "$lib/server/comments";
 import { createLikeAction, deleteLikeAction } from "$lib/server/likes";
-import { countRelation, likes } from "$lib/server/schemas";
+import { likes, sqliteDialect } from "$lib/server/schemas";
+import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
+import { SQL, sql } from "drizzle-orm";
+
+type CountRelationParams<T> = {
+	name: T;
+	fieldId: SQLiteColumn;
+	refId: SQLiteColumn;
+	refId2: SQLiteColumn;
+	id: string;
+};
+const countRelation = <const T extends string>({
+	name,
+	fieldId,
+	refId,
+	refId2,
+	id,
+}: CountRelationParams<T>): { [Key in T]: SQL.Aliased<number> } => {
+	const sqlChunks = sql`(SELECT COUNT(*) FROM ${refId.table} WHERE ${refId} = ${fieldId} AND ${refId2} = '${sql.raw(id)}')`;
+	const rawSQL = sql.raw(sqliteDialect.sqlToQuery(sqlChunks).sql);
+
+	return {
+		[name]: rawSQL.mapWith(Number).as(name),
+	} as { [Key in T]: SQL.Aliased<number> };
+};
 
 export const load: PageServerLoad = async (event) => {
 	const userId = event.locals.user ? event.locals.user.id : "notarealid";
@@ -35,14 +59,16 @@ export const load: PageServerLoad = async (event) => {
 				},
 			},
 			extras: (fields) => ({
-				...countRelation("userLiked", fields.id, likes.postId, likes.userId, userId),
+				...countRelation({
+					name: "userLiked",
+					fieldId: fields.id,
+					refId: likes.postId,
+					refId2: likes.userId,
+					id: userId,
+				}),
 			}),
 		});
 	}
-
-	// async function withHasLiked(posts: Awaited<ReturnType<typeof getPosts>>) {
-
-	// }
 
 	const [
 		createPostForm,
