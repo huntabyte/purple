@@ -21,10 +21,6 @@ export const load: PageServerLoad = async (event) => {
 	async function getPosts() {
 		return await db.query.posts.findMany({
 			orderBy: (posts, { desc }) => [desc(posts.createdAt)],
-			columns: {
-				id: true,
-				content: true,
-			},
 			with: {
 				user: true,
 				comments: {
