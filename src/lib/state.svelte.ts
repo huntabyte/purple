@@ -1,5 +1,5 @@
 import type { Infer, SuperValidated } from "sveltekit-superforms";
-import type { PostWithUser } from "./server/schemas";
+import type { PostWithRelations } from "./server/schemas";
 import type { createPostCommentSchema, deletePostSchema, updatePostSchema } from "./zod-schemas";
 import { getContext, setContext } from "svelte";
 
@@ -16,7 +16,7 @@ export function ref<T>(initialValue: T) {
 }
 
 type SetPostState = {
-	post: PostWithUser;
+	post: PostWithRelations;
 	deletePostForm: SuperValidated<Infer<typeof deletePostSchema>>;
 	updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 	createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
@@ -34,7 +34,7 @@ export class PostState {
 	dropdownOpen = $state(false);
 	updateOpen = $state(false);
 	commentOpen = $state(false);
-	post: PostWithUser = $state() as PostWithUser;
+	post: PostWithRelations = $state() as PostWithRelations;
 
 	constructor(init: SetPostState) {
 		this.deletePostForm = init.deletePostForm;

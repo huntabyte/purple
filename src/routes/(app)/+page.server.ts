@@ -23,24 +23,15 @@ export const load: PageServerLoad = async () => {
 	const posts = await db.query.posts.findMany({
 		orderBy: (posts, { desc }) => [desc(posts.createdAt)],
 		with: {
-			user: {
-				columns: {
-					username: true,
+			user: true,
+			comments: {
+				with: {
+					user: true,
 				},
 			},
-			comments: {
-				columns: {
-					content: true,
-					id: true,
-					createdAt: true,
-				},
+			likes: {
 				with: {
-					user: {
-						columns: {
-							username: true,
-							id: true,
-						},
-					},
+					user: true,
 				},
 			},
 		},
@@ -61,7 +52,7 @@ export const actions: Actions = {
 		const form = await superValidate(event, zod(createPostSchema));
 
 		if (!form.valid) {
-			return fail(400, { form });
+			return fail(400, { createPostForm: form });
 		}
 
 		const postId = generateId(15);
@@ -69,55 +60,66 @@ export const actions: Actions = {
 		// create post in db
 		await db.insert(posts).values({ id: postId, ...form.data, userId: event.locals.user.id });
 
-		return { form };
+		return { createPostForm: form };
 	},
 	deletePost: async (event) => {
 		if (!event.locals.user) redirect(302, "/login");
 		const form = await superValidate(event.url, zod(deletePostSchema));
 
 		if (!form.valid) {
-			return setError(form, "", "Error deleting post");
+			setError(form, "", "Error deleting post");
+			return {
+				deletePostForm: form,
+			};
 		}
 
-		if (!getPostById(form.data.id, event.locals.user.id)) {
-			return setError(form, "", "Unable to delete post.");
+		const post = await getPostById(form.data.id);
+
+		if (!post || post.userId !== event.locals.user.id) {
+			error(401, "You are not allowed to delete this post.");
 		}
 
 		await db.delete(posts).where(eq(posts.id, form.data.id));
 
 		return {
-			form,
+			deletePostForm: form,
 		};
 	},
 	updatePost: async (event) => {
 		if (!event.locals.user) redirect(302, "/login");
 		const form = await superValidate(event, zod(updatePostSchema));
-		if (!form.valid) return fail(400, { form });
+		if (!form.valid) return fail(400, { updatePostForm: form });
 
 		const postId = event.url.searchParams.get("id");
-		if (!postId || !(await getPostById(postId, event.locals.user.id))) {
-			return setError(form, "", "Unable to update post.");
+		if (!postId) error(400, "Invalid postId");
+		const post = await getPostById(postId);
+
+		if (!post || post.userId !== event.locals.user.id) {
+			error(401, "You are not allowed to delete this post.");
 		}
 
 		await db.update(posts).set(form.data).where(eq(posts.id, postId));
 
-		return { form };
+		return { updatePostForm: form };
 	},
 	createComment: async (event) => {
 		if (!event.locals.user) redirect(302, "/login");
 		const form = await superValidate(event, zod(createPostCommentSchema));
-		if (!form.valid) return fail(400, { form });
+		if (!form.valid) {
+			return fail(400, { createCommentForm: form });
+		}
 
 		const postId = event.url.searchParams.get("postId");
 		if (!postId) error(400, "Invalid postId");
-		if (await getPostById(postId, event.locals.user.id)) {
-			error(403, "You are not allowed to comment on your own post");
-		}
+
+		const post = await getPostById(postId);
+
+		if (!post) error(400, "Invalid post");
 
 		await db.insert(comments).values({ ...form.data, postId, userId: event.locals.user.id });
 
 		return {
-			form,
+			createCommentForm: form,
 		};
 	},
 };

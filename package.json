@@ -12,8 +12,8 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"db:push": "drizzle-kit push:sqlite",
-		"studio": "drizzle-kit studio",
-		"seed": "rm ./db.sqlite && pnpm db:push && tsx scripts/seed.ts"
+		"db:seed": "rm ./db.sqlite && pnpm db:push && tsx scripts/seed.ts",
+		"studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^8.4.1",

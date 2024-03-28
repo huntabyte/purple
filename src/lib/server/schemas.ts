@@ -70,9 +70,22 @@ export const comments = sqliteTable("comment", {
 	...timestamps,
 });
 
+export const likes = sqliteTable("like", {
+	id: text("id")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => generateId(15)),
+	userId: text("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	postId: text("post_id").references(() => posts.id, { onDelete: "cascade" }),
+	...timestamps,
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
 	posts: many(posts),
 	comments: many(comments),
+	likes: many(likes),
 }));
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -81,6 +94,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 		references: [users.id],
 	}),
 	comments: many(comments),
+	likes: many(likes),
 }));
 
 export const commentsRelations = relations(comments, ({ one }) => ({
@@ -94,7 +108,19 @@ export const commentsRelations = relations(comments, ({ one }) => ({
 	}),
 }));
 
+export const likesRelations = relations(likes, ({ one }) => ({
+	user: one(users, {
+		fields: [likes.userId],
+		references: [users.id],
+	}),
+	post: one(posts, {
+		fields: [likes.postId],
+		references: [posts.id],
+	}),
+}));
+
 export type User = InferSelectModel<typeof users>;
+export type Like = InferSelectModel<typeof likes>;
 export type Post = InferSelectModel<typeof posts>;
 export type Comment = InferSelectModel<typeof comments>;
 
@@ -103,9 +129,22 @@ export type UserWithPosts = User & {
 };
 
 export type PostWithUser = Post & {
-	user: Pick<User, "username">;
+	user: User;
 };
 
 export type PostWithUserAndComments = PostWithUser & {
 	comments: Comment[];
+};
+
+export type CommentWithUser = Comment & {
+	user: User;
+};
+export type LikeWithUser = Like & {
+	user: User;
+};
+
+export type PostWithRelations = Post & {
+	user: User;
+	comments: CommentWithUser[];
+	likes: LikeWithUser[];
 };

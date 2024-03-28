@@ -32,4 +32,6 @@
 		</div>
 	</div>
 </div>
-<slot />
+<div class="container max-w-xl">
+	<slot />
+</div>
