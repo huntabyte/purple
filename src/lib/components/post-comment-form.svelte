@@ -13,8 +13,10 @@
 	const form = superForm(data.createCommentForm, {
 		id: `post-comment-form-${data.post.id}`,
 		validators: zodClient(createPostCommentSchema),
-		onUpdated: () => {
-			data.commentOpen = false;
+		onUpdated: ({ form }) => {
+			if (form.valid) {
+				data.commentOpen = false;
+			}
 		},
 	});
 
@@ -24,7 +26,7 @@
 </script>
 
 {#if data.commentOpen}
-	<form action="?/createComment&postId={data.post.id}" method="POST" use:enhance class="w-full">
+	<form action="/?/createComment&postId={data.post.id}" method="POST" use:enhance class="w-full">
 		<Form.Field {form} name="content">
 			<Form.Control let:attrs>
 				<Form.Label>Leave a note</Form.Label>

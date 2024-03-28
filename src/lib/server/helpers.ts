@@ -6,33 +6,15 @@ export async function getPostById(postId: string) {
 	const post = await db.query.posts.findFirst({
 		where: and(eq(posts.id, postId)),
 		with: {
-			user: { columns: { id: true, username: true } },
+			user: true,
 			comments: {
-				columns: {
-					content: true,
-					id: true,
-					createdAt: true,
-				},
 				with: {
-					user: {
-						columns: {
-							username: true,
-							id: true,
-						},
-					},
+					user: true,
 				},
 			},
 			likes: {
-				columns: {
-					id: true,
-				},
 				with: {
-					user: {
-						columns: {
-							username: true,
-							id: true,
-						},
-					},
+					user: true,
 				},
 			},
 		},
