@@ -5,28 +5,17 @@
 	import { createLikeSchema, deleteLikeSchema } from "$lib/zod-schemas";
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
-	import { invalidateAll } from "$app/navigation";
 
 	const postState = getPostState();
 
 	const createForm = superForm(postState.createLikeForm, {
 		id: `post-like-form-${postState.post.id}`,
 		validators: zodClient(createLikeSchema),
-		onUpdated: async ({ form }) => {
-			if (form.valid) {
-				await invalidateAll();
-			}
-		},
 	});
 
 	const deleteForm = superForm(postState.deleteLikeForm, {
 		id: `post-delete-form-${postState.post.id}`,
 		validators: zodClient(deleteLikeSchema),
-		onUpdated: async ({ form }) => {
-			if (form.valid) {
-				await invalidateAll();
-			}
-		},
 	});
 
 	const { enhance: createEnhance } = createForm;
