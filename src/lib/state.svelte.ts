@@ -3,6 +3,7 @@ import type { PostWithRelations } from "./server/schemas";
 import type {
 	createLikeSchema,
 	createPostCommentSchema,
+	deleteLikeSchema,
 	deletePostSchema,
 	updatePostSchema,
 } from "./zod-schemas";
@@ -26,12 +27,14 @@ type SetPostState = {
 	updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 	createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
 	createLikeForm: SuperValidated<Infer<typeof createLikeSchema>>;
+	deleteLikeForm: SuperValidated<Infer<typeof deleteLikeSchema>>;
 };
 export class PostState {
 	deletePostForm = $state() as SuperValidated<Infer<typeof deletePostSchema>>;
 	updatePostForm = $state() as SuperValidated<Infer<typeof updatePostSchema>>;
 	createCommentForm = $state() as SuperValidated<Infer<typeof createPostCommentSchema>>;
 	createLikeForm = $state() as SuperValidated<Infer<typeof createLikeSchema>>;
+	deleteLikeForm = $state() as SuperValidated<Infer<typeof deleteLikeSchema>>;
 	deleteOpen = $state(false);
 	dropdownOpen = $state(false);
 	updateOpen = $state(false);
@@ -43,6 +46,7 @@ export class PostState {
 		this.updatePostForm = init.updatePostForm;
 		this.createCommentForm = init.createCommentForm;
 		this.createLikeForm = init.createLikeForm;
+		this.deleteLikeForm = init.deleteLikeForm;
 		this.post = init.post;
 	}
 }

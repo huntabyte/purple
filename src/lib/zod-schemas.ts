@@ -51,5 +51,5 @@ export const createLikeSchema = z.object({
 });
 
 export const deleteLikeSchema = z.object({
-	likeId: z.string(),
+	postId: z.string(),
 });

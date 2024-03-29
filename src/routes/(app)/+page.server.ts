@@ -10,35 +10,15 @@ import {
 	deletePostSchema,
 	updatePostSchema,
 } from "$lib/zod-schemas";
-import { createPostAction, deletePostAction, updatePostAction } from "$lib/server/posts";
+import {
+	createPostAction,
+	deletePostAction,
+	updatePostAction,
+	userLikedCount,
+} from "$lib/server/posts";
 import { createCommentAction } from "$lib/server/comments";
 import { createLikeAction, deleteLikeAction } from "$lib/server/likes";
-import { likesTable, sqliteDialect } from "$lib/server/schemas";
-import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
-import { SQL, sql } from "drizzle-orm";
-
-type CountRelationParams<T> = {
-	name: T;
-	fieldId: SQLiteColumn;
-	refId: SQLiteColumn;
-	refId2: SQLiteColumn;
-	id: string;
-};
-
-const countRelation = <const T extends string>({
-	name,
-	fieldId,
-	refId,
-	refId2,
-	id,
-}: CountRelationParams<T>): { [Key in T]: SQL.Aliased<number> } => {
-	const sqlChunks = sql`(SELECT COUNT(*) FROM ${refId.table} WHERE ${refId} = ${fieldId} AND ${refId2} = '${sql.raw(id)}')`;
-	const rawSQL = sql.raw(sqliteDialect.sqlToQuery(sqlChunks).sql);
-
-	return {
-		[name]: rawSQL.mapWith(Number).as(name),
-	} as { [Key in T]: SQL.Aliased<number> };
-};
+import { likesTable } from "$lib/server/schemas";
 
 export const load: PageServerLoad = async (event) => {
 	const userId = event.locals.user ? event.locals.user.id : "notarealid";
@@ -59,7 +39,7 @@ export const load: PageServerLoad = async (event) => {
 				},
 			},
 			extras: (fields) => ({
-				...countRelation({
+				...userLikedCount({
 					name: "userLiked",
 					fieldId: fields.id,
 					refId: likesTable.postId,

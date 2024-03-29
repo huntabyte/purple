@@ -4,7 +4,7 @@ import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { db } from "./db";
 import { likesTable } from "./schemas";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function createLikeAction(event: RequestEvent) {
 	if (!event.locals.user) redirect(303, "/login");
@@ -18,17 +18,28 @@ export async function createLikeAction(event: RequestEvent) {
 	}
 
 	try {
+		const [like] = await getPostLikeByUser(form.data.postId, event.locals.user.id);
+		if (like) throw new Error();
+
 		await db.insert(likesTable).values({
 			postId: form.data.postId,
 			userId: event.locals.user.id,
 		});
 	} catch (e) {
-		setError(form, "", "An error occurred while liking the post. Please try again later.");
+		setError(form, "An error occurred while liking the post. Please try again later.");
 	}
 
 	return {
 		createLikeForm: form,
 	};
+}
+
+async function getPostLikeByUser(postId: string, userId: string) {
+	return await db
+		.select()
+		.from(likesTable)
+		.where(and(eq(likesTable.postId, postId), eq(likesTable.userId, userId)))
+		.limit(1);
 }
 
 export async function deleteLikeAction(event: RequestEvent) {
@@ -42,10 +53,16 @@ export async function deleteLikeAction(event: RequestEvent) {
 		});
 	}
 
+	// check if the user has liked the post
 	try {
-		await db.delete(likesTable).where(eq(likesTable.id, form.data.likeId));
+		const [like] = await getPostLikeByUser(form.data.postId, event.locals.user.id);
+		if (!like) throw new Error();
+
+		await db
+			.delete(likesTable)
+			.where(and(eq(likesTable.id, form.data.postId), eq(likesTable.userId, event.locals.user.id)));
 	} catch {
-		setError(form, "", "An error occurred while unliking the post. Please try again later.");
+		setError(form, "An error occurred while unliking the post. Please try again later.");
 	}
 
 	return {

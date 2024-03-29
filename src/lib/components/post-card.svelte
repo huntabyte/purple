@@ -12,6 +12,7 @@
 	import {
 		createLikeSchema,
 		createPostCommentSchema,
+		deleteLikeSchema,
 		deletePostSchema,
 		updatePostSchema,
 	} from "$lib/zod-schemas";
@@ -29,9 +30,17 @@
 		updatePostForm: SuperValidated<Infer<typeof updatePostSchema>>;
 		createCommentForm: SuperValidated<Infer<typeof createPostCommentSchema>>;
 		createLikeForm: SuperValidated<Infer<typeof createLikeSchema>>;
+		deleteLikeForm: SuperValidated<Infer<typeof deleteLikeSchema>>;
 	};
 
-	let { post, deletePostForm, updatePostForm, createCommentForm, createLikeForm }: Props = $props();
+	let {
+		post,
+		deletePostForm,
+		updatePostForm,
+		createCommentForm,
+		createLikeForm,
+		deleteLikeForm,
+	}: Props = $props();
 
 	const data = setPostState({
 		post,
@@ -39,6 +48,7 @@
 		updatePostForm,
 		createCommentForm,
 		createLikeForm,
+		deleteLikeForm,
 	});
 
 	// eslint-disable-next-line svelte/valid-compile
@@ -92,7 +102,7 @@
 	</div>
 	<div class="flex flex-col">
 		<div>
-			<a href="/posts/{post.id}" class="mb-2 text-2xl font-medium">{post.title}</a>
+			<a href="/posts/{post.id}" class="mb-2 text-xl font-medium">{post.title}</a>
 			<p>{post.content}</p>
 		</div>
 		<div class="flex w-full items-center justify-between">
