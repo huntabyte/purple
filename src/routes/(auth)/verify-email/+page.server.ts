@@ -1,4 +1,5 @@
-import { verifyEmailToken } from "$lib/server/user.js";
+import { lucia } from "$lib/server/auth.js";
+import { verifyEmailToken } from "$lib/server/email-verification.js";
 import { verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 import { fail, redirect } from "@sveltejs/kit";
 import { setError, superValidate } from "sveltekit-superforms";
@@ -30,6 +31,8 @@ export const actions = {
 		} catch {
 			return setError(form, "Invalid token.");
 		}
+
+		await lucia.invalidateUserSessions(event.locals.session.userId);
 
 		redirect(303, "/");
 	},

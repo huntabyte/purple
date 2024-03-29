@@ -8,7 +8,7 @@ import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { lucia } from "$lib/server/auth";
 import { db } from "$lib/server/db";
-import { sendVerificationEmail } from "$lib/server/user.js";
+import { sendVerificationEmail } from "$lib/server/email-verification.js";
 
 export const load = async (event) => {
 	if (event.locals.user) redirect(302, "/");
