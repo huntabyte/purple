@@ -12,7 +12,6 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"db:push": "drizzle-kit push:sqlite",
-		"db:seed": "rm ./db.sqlite && pnpm db:push && tsx scripts/seed.ts",
 		"studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
@@ -52,11 +51,13 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@types/nodemailer": "^6.4.14",
 		"bits-ui": "^0.19.5",
 		"clsx": "^2.1.0",
 		"formsnap": "^0.5.1",
 		"lucide-svelte": "^0.344.0",
 		"mode-watcher": "^0.2.2",
+		"nodemailer": "^6.9.13",
 		"svelte-sonner": "^0.3.19",
 		"sveltekit-superforms": "^2.8.0",
 		"tailwind-merge": "^2.2.1",

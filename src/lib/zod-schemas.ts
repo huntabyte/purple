@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const registerSchema = z
 	.object({
-		username: z.string().min(3).max(30),
+		email: z.string().email({ message: "Please enter a valid email address." }),
 		password: z.string().min(4).max(255),
 		passwordConfirm: z.string().min(4).max(255),
 	})
@@ -12,7 +12,7 @@ export const registerSchema = z
 	});
 
 export const loginSchema = z.object({
-	username: z.string().min(1, "Please enter a username."),
+	email: z.string().email({ message: "Please enter a valid email address." }),
 	password: z.string().min(1, "Please enter a password."),
 });
 
@@ -52,4 +52,8 @@ export const createLikeSchema = z.object({
 
 export const deleteLikeSchema = z.object({
 	postId: z.string(),
+});
+
+export const verifyEmailTokenSchema = z.object({
+	token: z.string().min(1, "Please enter the token you received in your email."),
 });

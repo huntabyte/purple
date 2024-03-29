@@ -8,6 +8,7 @@ import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
 import { lucia } from "$lib/server/auth";
 import { db } from "$lib/server/db";
+import { sendVerificationEmail } from "$lib/server/user.js";
 
 export const load = async (event) => {
 	if (event.locals.user) redirect(302, "/");
@@ -28,22 +29,22 @@ export const actions = {
 		}
 
 		const userExists = db
-			.select({ username: usersTable.username })
+			.select({ email: usersTable.email })
 			.from(usersTable)
-			.where(eq(usersTable.username, form.data.username))
+			.where(eq(usersTable.email, form.data.email))
 			.get();
 
 		if (userExists) {
-			return setError(form, "username", "Username already exists.");
+			return setError(form, "email", "Username already exists.");
 		}
 
 		const userId = generateId(15);
 		const hashedPassword = await new Argon2id().hash(form.data.password);
 
-		const { id } = db
+		const { id, email } = db
 			.insert(usersTable)
-			.values({ username: form.data.username, id: userId })
-			.returning({ id: usersTable.id })
+			.values({ email: form.data.email, id: userId })
+			.returning({ id: usersTable.id, email: usersTable.email })
 			.get();
 
 		db.insert(accountsTable).values({
@@ -58,6 +59,8 @@ export const actions = {
 			...sessionCookie.attributes,
 		});
 
-		redirect(302, "/login");
+		await sendVerificationEmail(email);
+
+		redirect(302, "/verify-email");
 	},
 };

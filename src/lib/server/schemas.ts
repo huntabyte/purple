@@ -29,8 +29,20 @@ export const accountsTable = sqliteTable("account", {
 
 export const usersTable = sqliteTable("user", {
 	id: text("id").notNull().primaryKey(),
-	username: text("username").notNull().unique(),
+	email: text("email").notNull().unique(),
+	emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
 	...timestamps,
+});
+
+export const emailVerificationTokensTable = sqliteTable("email_verification_token", {
+	id: text("id")
+		.notNull()
+		.$defaultFn(() => generateId(15)),
+	email: text("email")
+		.notNull()
+		.references(() => usersTable.email),
+	token: text("token").notNull(),
+	expiresAt: integer("expires_at").notNull(),
 });
 
 /**

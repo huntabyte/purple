@@ -21,10 +21,10 @@
 		<p class="text-sm text-muted-foreground">Start building your digital community today.</p>
 	</div>
 	<form method="POST" use:enhance class="w-full space-y-4">
-		<Form.Field {form} name="username">
+		<Form.Field {form} name="email">
 			<Form.Control let:attrs>
-				<Form.Label>Username</Form.Label>
-				<Input type="text" {...attrs} bind:value={$formData.username} />
+				<Form.Label>Email</Form.Label>
+				<Input type="text" {...attrs} bind:value={$formData.email} />
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
