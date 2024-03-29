@@ -52,9 +52,7 @@
 	});
 
 	$effect(() => {
-		if (post.id === "dcttfix1ly59ua8") {
-			data.post = post
-		}
+		data.post = post;
 	});
 
 	// eslint-disable-next-line svelte/valid-compile

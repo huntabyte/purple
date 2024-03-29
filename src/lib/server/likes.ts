@@ -56,7 +56,6 @@ export async function deleteLikeAction(event: RequestEvent) {
 	// check if the user has liked the post
 	try {
 		const [like] = await getPostLikeByUser(form.data.postId, event.locals.user.id);
-		console.log(like);
 		if (!like) throw new Error();
 
 		await db
