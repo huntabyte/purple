@@ -56,11 +56,12 @@ export async function deleteLikeAction(event: RequestEvent) {
 	// check if the user has liked the post
 	try {
 		const [like] = await getPostLikeByUser(form.data.postId, event.locals.user.id);
+		console.log(like);
 		if (!like) throw new Error();
 
 		await db
 			.delete(likesTable)
-			.where(and(eq(likesTable.id, form.data.postId), eq(likesTable.userId, event.locals.user.id)));
+			.where(and(eq(likesTable.id, like.id), eq(likesTable.userId, event.locals.user.id)));
 	} catch {
 		setError(form, "An error occurred while unliking the post. Please try again later.");
 	}

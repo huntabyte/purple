@@ -5,35 +5,46 @@
 	import { createLikeSchema, deleteLikeSchema } from "$lib/zod-schemas";
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
+	import { invalidateAll } from "$app/navigation";
 
-	const { createLikeForm, deleteLikeForm, post } = getPostState();
+	const postState = getPostState();
 
-	const createForm = superForm(createLikeForm, {
-		id: `post-like-form-${post.id}`,
+	const createForm = superForm(postState.createLikeForm, {
+		id: `post-like-form-${postState.post.id}`,
 		validators: zodClient(createLikeSchema),
+		onUpdated: async ({ form }) => {
+			if (form.valid) {
+				await invalidateAll();
+			}
+		},
 	});
 
-	const deleteForm = superForm(deleteLikeForm, {
-		id: `post-delete-form-${post.id}`,
+	const deleteForm = superForm(postState.deleteLikeForm, {
+		id: `post-delete-form-${postState.post.id}`,
 		validators: zodClient(deleteLikeSchema),
+		onUpdated: async ({ form }) => {
+			if (form.valid) {
+				await invalidateAll();
+			}
+		},
 	});
 
 	const { enhance: createEnhance } = createForm;
 	const { enhance: deleteEnhance } = deleteForm;
 </script>
 
-{#if post.userLiked}
-	<form method="POST" action="/?/deleteLike&postId={post.id}" use:deleteEnhance>
+{#if postState.post.userLiked}
+	<form method="POST" action="/?/deleteLike&postId={postState.post.id}" use:deleteEnhance>
 		<Button variant="ghost" size="icon" class="gap-1" type="submit">
 			<Heart class="size-4 text-rose-500" />
-			{post.likes.length}
+			{postState.post.likes.length}
 		</Button>
 	</form>
 {:else}
-	<form method="POST" action="/?/createLike&postId={post.id}" use:createEnhance>
+	<form method="POST" action="/?/createLike&postId={postState.post.id}" use:createEnhance>
 		<Button variant="ghost" size="icon" class="gap-1" type="submit">
 			<Heart class="size-4" />
-			{post.likes.length}
+			{postState.post.likes.length}
 		</Button>
 	</form>
 {/if}

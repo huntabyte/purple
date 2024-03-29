@@ -21,7 +21,6 @@ export const actions = {
 		if (event.locals.user) redirect(302, "/");
 		const form = await superValidate(event, zod(registerSchema));
 		if (!form.valid) {
-			console.log("form", form);
 			return fail(400, {
 				form,
 			});
