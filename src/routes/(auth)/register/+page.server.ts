@@ -6,7 +6,6 @@ import { usersTable, accountsTable } from "$lib/server/schemas.js";
 import { eq } from "drizzle-orm";
 import { generateId } from "lucia";
 import { Argon2id } from "oslo/password";
-import { lucia } from "$lib/server/auth";
 import { db } from "$lib/server/db";
 import { sendVerificationEmail } from "$lib/server/email-verification.js";
 
@@ -52,13 +51,7 @@ export const actions = {
 			hashedPassword,
 		});
 
-		const session = await lucia.createSession(id, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		event.cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: ".",
-			...sessionCookie.attributes,
-		});
-
+		await event.locals.createSession(id);
 		await sendVerificationEmail(email);
 
 		redirect(302, "/verify-email");

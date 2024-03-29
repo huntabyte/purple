@@ -4,6 +4,16 @@ import { type Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const sessionId = event.cookies.get(lucia.sessionCookieName);
+
+	event.locals.createSession = async (userId: string) => {
+		const session = await lucia.createSession(userId, {});
+		const sessionCookie = lucia.createSessionCookie(session.id);
+		event.cookies.set(sessionCookie.name, sessionCookie.value, {
+			path: ".",
+			...sessionCookie.attributes,
+		});
+	};
+
 	if (!sessionId) {
 		event.locals.user = null;
 		event.locals.session = null;

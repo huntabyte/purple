@@ -33,6 +33,7 @@ export const actions = {
 		}
 
 		await lucia.invalidateUserSessions(event.locals.session.userId);
+		await event.locals.createSession(event.locals.user.id);
 
 		redirect(303, "/");
 	},
