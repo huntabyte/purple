@@ -38,9 +38,11 @@ export const emailVerificationTokensTable = sqliteTable("email_verification_toke
 	id: text("id")
 		.notNull()
 		.$defaultFn(() => generateId(15)),
-	email: text("email")
+	userId: text("user_id")
 		.notNull()
-		.references(() => usersTable.email),
+		.references(() => usersTable.id)
+		.unique(),
+	email: text("email").notNull(),
 	token: text("token").notNull(),
 	expiresAt: integer("expires_at").notNull(),
 });

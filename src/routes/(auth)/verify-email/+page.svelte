@@ -11,8 +11,10 @@
 		validators: zodClient(verifyEmailTokenSchema),
 	});
 
-	const { form: formData, enhance } = form;
+	const { form: formData, enhance, message } = form;
 </script>
+
+{$message}
 
 <div
 	class="container relative hidden h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"

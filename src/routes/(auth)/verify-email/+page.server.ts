@@ -2,7 +2,7 @@ import { lucia } from "$lib/server/auth.js";
 import { verifyEmailToken } from "$lib/server/email-verification.js";
 import { verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 import { fail, redirect } from "@sveltejs/kit";
-import { setError, superValidate } from "sveltekit-superforms";
+import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 
 export const load = async () => {
@@ -22,14 +22,22 @@ export const actions = {
 			return fail(400, { form });
 		}
 
-		try {
-			await verifyEmailToken({
-				user: event.locals.user,
-				token: form.data.token,
-				email: event.locals.user.email,
+		const { expired, invalid } = await verifyEmailToken({
+			user: event.locals.user,
+			token: form.data.token,
+			email: event.locals.user.email,
+		});
+
+		if (expired) {
+			setError(form, "token", "Token has expired. Please request a new one.");
+			return message(form, "EXPIRED", {
+				status: 400,
 			});
-		} catch {
-			return setError(form, "Invalid token.");
+		} else if (invalid) {
+			setError(form, "token", "Invalid token.");
+			return message(form, "INVALID", {
+				status: 400,
+			});
 		}
 
 		await lucia.invalidateUserSessions(event.locals.session.userId);

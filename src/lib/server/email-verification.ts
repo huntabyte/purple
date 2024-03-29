@@ -6,24 +6,25 @@ import { emailVerificationTokensTable, usersTable } from "./schemas";
 import { and, eq } from "drizzle-orm";
 import type { User } from "lucia";
 
-async function deleteExistingEmailVerificationTokens(email: string) {
+async function deleteExistingEmailVerificationTokens(userId: string) {
 	return await db
 		.delete(emailVerificationTokensTable)
-		.where(eq(emailVerificationTokensTable.email, email));
+		.where(eq(emailVerificationTokensTable.userId, userId));
 }
 
-export async function sendVerificationEmail(email: string) {
+export async function sendVerificationEmail(email: string, userId: string) {
 	/**
 	 * Before sending a new email verification token, delete any existing tokens for
 	 * the email the user is trying to verify.
 	 */
-	await deleteExistingEmailVerificationTokens(email);
+	await deleteExistingEmailVerificationTokens(userId);
 	const expiresAt = createDate(new TimeSpan(4, "h")).getTime();
 	const token = generateRandomString(6, alphabet("a-z", "0-9"));
 	try {
 		const { dbToken } = db
 			.insert(emailVerificationTokensTable)
 			.values({
+				userId,
 				email,
 				token,
 				expiresAt,
@@ -52,30 +53,42 @@ export async function verifyEmailToken({ user, email, token }: VerifyEmailTokenP
 	const record = db
 		.select()
 		.from(emailVerificationTokensTable)
-		.where(
-			and(
-				eq(emailVerificationTokensTable.email, user.email),
-				eq(emailVerificationTokensTable.token, token)
-			)
-		)
+		.where(and(eq(emailVerificationTokensTable.userId, user.id)))
 		.get();
 
-	if (record) {
-		console.log(new Date(record.expiresAt));
-	}
+	const returnObj = {
+		expired: false,
+		invalid: false,
+		verified: false,
+	};
 
 	// if no rcord, token is expired, or token doesn't match, throw error
-	if (!record || !isWithinExpirationDate(new Date(record.expiresAt)) || record.token !== token) {
-		throw new Error("Invalid token");
+	if (!record || !isWithinExpirationDate(new Date(record.expiresAt))) {
+		return {
+			...returnObj,
+			expired: true,
+		};
+	}
+
+	if (record.token !== token) {
+		return {
+			...returnObj,
+			invalid: true,
+		};
 	}
 
 	// otherwise, token was valid, delete it and verify user email
 
 	await Promise.all([
-		db.delete(emailVerificationTokensTable).where(eq(emailVerificationTokensTable.email, email)),
+		db.delete(emailVerificationTokensTable).where(eq(emailVerificationTokensTable.userId, user.id)),
 		db
 			.update(usersTable)
 			.set({ emailVerified: true, email: email })
 			.where(eq(usersTable.id, user.id)),
 	]);
+
+	return {
+		...returnObj,
+		verified: true,
+	};
 }

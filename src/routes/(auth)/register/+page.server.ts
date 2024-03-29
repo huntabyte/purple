@@ -52,7 +52,7 @@ export const actions = {
 		});
 
 		await event.locals.createSession(id);
-		await sendVerificationEmail(email);
+		await sendVerificationEmail(email, id);
 
 		redirect(302, "/verify-email");
 	},
