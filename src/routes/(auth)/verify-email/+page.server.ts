@@ -5,7 +5,10 @@ import { fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 
-export const load = async () => {
+export const load = async (event) => {
+	if (!event.locals.session || !event.locals.user) redirect(303, "/login");
+	if (event.locals.user.emailVerified) redirect(303, "/");
+
 	const [verifyForm, newForm] = await Promise.all([
 		superValidate(zod(verifyEmailTokenSchema)),
 		superValidate(zod(newEmailVerificationTokenSchema)),
