@@ -20,6 +20,7 @@ export const actions = {
 	default: async (event) => {
 		if (event.locals.user) redirect(302, "/");
 		const form = await superValidate(event, zod(registerSchema));
+
 		if (!form.valid) {
 			return fail(400, {
 				form,

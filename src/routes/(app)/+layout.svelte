@@ -13,7 +13,7 @@
 		<div>
 			<a href="/">Purple</a>
 		</div>
-		<div class="flex items-center justify-between">
+		<div class="flex items-center justify-between gap-2">
 			{#if !data.session}
 				<div class="flex max-w-xl items-center gap-4">
 					<Button href="/login" variant={$page.url.pathname.includes("login") ? "outline" : "ghost"}
@@ -25,6 +25,7 @@
 					>
 				</div>
 			{:else}
+				<Button href="/account" variant="ghost">Manage Account</Button>
 				<form action="/logout" method="POST">
 					<Button type="submit">Logout</Button>
 				</form>

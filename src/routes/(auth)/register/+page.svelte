@@ -35,8 +35,15 @@
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
+		<Form.Field {form} name="passwordConfirm">
+			<Form.Control let:attrs>
+				<Form.Label>Confirm Password</Form.Label>
+				<Input type="password" {...attrs} bind:value={$formData.passwordConfirm} />
+			</Form.Control>
+			<Form.FieldErrors />
+		</Form.Field>
 		<Form.Errors errors={$errors._errors} />
-		<Form.Button>Login</Form.Button>
+		<Form.Button>Register</Form.Button>
 	</form>
 	<p class="px-8 text-center text-sm text-muted-foreground">
 		By clicking continue, you agree to our{" "}
