@@ -7,14 +7,15 @@
 
 	let { data } = $props();
 
-	const form = superForm(data.form, {
+	const verifyForm = superForm(data.verifyForm, {
 		validators: zodClient(verifyEmailTokenSchema),
 	});
 
-	const { form: formData, enhance, message } = form;
-</script>
+	const newForm = superForm(data.newForm);
 
-{$message}
+	const { form: formData, enhance: verifyEnhance, message: verifyMessage } = verifyForm;
+	const { enhance: newEnhance } = newForm;
+</script>
 
 <div
 	class="container relative hidden h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
@@ -48,16 +49,24 @@
 					email for the verification token.
 				</p>
 			</div>
-			<form method="POST" use:enhance class="w-full space-y-4">
-				<Form.Field {form} name="token">
-					<Form.Control let:attrs>
-						<Form.Label>Token</Form.Label>
-						<Input {...attrs} bind:value={$formData.token} />
-					</Form.Control>
-					<Form.FieldErrors />
-				</Form.Field>
-				<Form.Button class="w-full">Verify email</Form.Button>
-			</form>
+
+			{#if String($verifyMessage) === "EXPIRED"}
+				<form method="POST" action="?/newToken" use:newEnhance class="w-full space-y-4">
+					<p>Your token has expired.</p>
+					<Form.Button class="w-full">Request new token</Form.Button>
+				</form>
+			{:else}
+				<form method="POST" action="?/verifyToken" use:verifyEnhance class="w-full space-y-4">
+					<Form.Field form={verifyForm} name="token">
+						<Form.Control let:attrs>
+							<Form.Label>Token</Form.Label>
+							<Input {...attrs} bind:value={$formData.token} />
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
+					<Form.Button class="w-full">Verify email</Form.Button>
+				</form>
+			{/if}
 		</div>
 	</div>
 </div>

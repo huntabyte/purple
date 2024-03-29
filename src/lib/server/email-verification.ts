@@ -18,7 +18,7 @@ export async function sendVerificationEmail(email: string, userId: string) {
 	 * the email the user is trying to verify.
 	 */
 	await deleteExistingEmailVerificationTokens(userId);
-	const expiresAt = createDate(new TimeSpan(4, "h")).getTime();
+	const expiresAt = createDate(new TimeSpan(8, "h")).getTime();
 	const token = generateRandomString(6, alphabet("a-z", "0-9"));
 	try {
 		const { dbToken } = db

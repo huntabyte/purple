@@ -1,20 +1,23 @@
 import { lucia } from "$lib/server/auth.js";
-import { verifyEmailToken } from "$lib/server/email-verification.js";
-import { verifyEmailTokenSchema } from "$lib/zod-schemas.js";
+import { sendVerificationEmail, verifyEmailToken } from "$lib/server/email-verification.js";
+import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 import { fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 
 export const load = async () => {
-	const form = await superValidate(zod(verifyEmailTokenSchema));
-
+	const [verifyForm, newForm] = await Promise.all([
+		superValidate(zod(verifyEmailTokenSchema)),
+		superValidate(zod(newEmailVerificationTokenSchema)),
+	]);
 	return {
-		form,
+		verifyForm,
+		newForm,
 	};
 };
 
 export const actions = {
-	default: async (event) => {
+	verifyToken: async (event) => {
 		if (!event.locals.session || !event.locals.user) redirect(303, "/login");
 
 		const form = await superValidate(event, zod(verifyEmailTokenSchema));
@@ -44,5 +47,17 @@ export const actions = {
 		await event.locals.createSession(event.locals.user.id);
 
 		redirect(303, "/");
+	},
+	newToken: async (event) => {
+		if (!event.locals.session || !event.locals.user) redirect(303, "/login");
+		const form = await superValidate(event, zod(newEmailVerificationTokenSchema));
+
+		try {
+			await sendVerificationEmail(event.locals.user.email, event.locals.user.id);
+		} catch {
+			return fail(500, { form });
+		}
+
+		return { form };
 	},
 };
