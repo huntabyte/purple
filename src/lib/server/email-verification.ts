@@ -1,10 +1,10 @@
-import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
-import { generateRandomString, alphabet } from "oslo/crypto";
+import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
+import { alphabet, generateRandomString } from "oslo/crypto";
+import { and, eq } from "drizzle-orm";
+import type { User } from "lucia";
 import { sendEmail } from "./email";
 import { db } from "./db";
 import { emailVerificationTokensTable, usersTable } from "./schemas";
-import { and, eq } from "drizzle-orm";
-import type { User } from "lucia";
 
 async function deleteExistingEmailVerificationTokens(userId: string) {
 	return await db
@@ -81,10 +81,7 @@ export async function verifyEmailToken({ user, email, token }: VerifyEmailTokenP
 
 	await Promise.all([
 		db.delete(emailVerificationTokensTable).where(eq(emailVerificationTokensTable.userId, user.id)),
-		db
-			.update(usersTable)
-			.set({ emailVerified: true, email: email })
-			.where(eq(usersTable.id, user.id)),
+		db.update(usersTable).set({ emailVerified: true, email }).where(eq(usersTable.id, user.id)),
 	]);
 
 	return {

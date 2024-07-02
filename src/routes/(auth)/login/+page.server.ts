@@ -1,20 +1,21 @@
-import { loginSchema } from "$lib/zod-schemas";
 import { fail, redirect } from "@sveltejs/kit";
-import type { Actions } from "./$types";
 import { setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { db } from "$lib/server/db";
-import { accountsTable, usersTable } from "$lib/server/schemas";
 import { eq } from "drizzle-orm";
 import { Argon2id } from "oslo/password";
+import type { Actions } from "./$types";
+import { accountsTable, usersTable } from "$lib/server/schemas";
+import { db } from "$lib/server/db";
+import { loginSchema } from "$lib/zod-schemas";
 import { lucia } from "$lib/server/auth";
 
-export const load = async (event) => {
+export async function load(event) {
 	if (event.locals.user) redirect(302, "/");
+
 	return {
 		form: await superValidate(zod(loginSchema)),
 	};
-};
+}
 
 export const actions: Actions = {
 	default: async (event) => {

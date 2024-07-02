@@ -1,11 +1,11 @@
-import { lucia } from "$lib/server/auth.js";
-import { sendVerificationEmail, verifyEmailToken } from "$lib/server/email-verification.js";
-import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 import { fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
+import { lucia } from "$lib/server/auth.js";
+import { sendVerificationEmail, verifyEmailToken } from "$lib/server/email-verification.js";
+import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 
-export const load = async (event) => {
+export async function load(event) {
 	if (!event.locals.session || !event.locals.user) redirect(303, "/login");
 	if (event.locals.user.emailVerified) redirect(303, "/");
 
@@ -17,7 +17,7 @@ export const load = async (event) => {
 		verifyForm,
 		newForm,
 	};
-};
+}
 
 export const actions = {
 	verifyToken: async (event) => {

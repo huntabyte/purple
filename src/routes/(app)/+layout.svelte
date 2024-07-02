@@ -2,10 +2,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { page } from "$app/stores";
 
-	let { data } = $props();
-
-	// eslint-disable-next-line svelte/valid-compile
-	$page;
+	let { data, children } = $props();
 </script>
 
 <div class="flex h-16 w-full items-center border-b">
@@ -34,5 +31,5 @@
 	</div>
 </div>
 <div class="container max-w-xl">
-	<slot />
+	{@render children?.()}
 </div>

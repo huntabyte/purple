@@ -22,7 +22,7 @@
 </script>
 
 <div
-	class="container relative hidden h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
+	class="container relative h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
 >
 	<Button href={altLink.href} variant="ghost" class="absolute right-4 top-4 md:right-8 md:top-8">
 		{altLink.text}
@@ -33,7 +33,7 @@
 			style="
 				background-image:
 					url(https://images.unsplash.com/photo-1534515538060-80212d73acb6?q=80&auto=format&fit=crop&w=1376&q=80);"
-		/>
+		></div>
 		<div class="relative z-20 flex items-center text-lg font-medium">
 			<a href="/" class="underline-offset-4 hover:underline"> Purple </a>
 		</div>

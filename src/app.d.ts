@@ -1,7 +1,7 @@
 // See https://kit.svelte.dev/docs/types#app
 
 import type { Infer, SuperValidated } from "sveltekit-superforms";
-import { updatePostSchema } from "./lib/zod-schemas";
+import type { updatePostSchema } from "./lib/zod-schemas";
 
 // for information about these interfaces
 declare global {

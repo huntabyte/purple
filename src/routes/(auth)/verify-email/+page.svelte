@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
+	import { verifyEmailTokenSchema } from "$lib/zod-schemas.js";
 	import * as Form from "$lib/components/ui/form";
 	import { Input } from "$lib/components/ui/input";
 
@@ -26,7 +26,7 @@
 			style="
 				background-image:
 					url(https://images.unsplash.com/photo-1534515538060-80212d73acb6?q=80&auto=format&fit=crop&w=1376&q=80);"
-		/>
+		></div>
 		<div class="relative z-20 flex items-center text-lg font-medium">
 			<a href="/" class="underline-offset-4 hover:underline"> Purple </a>
 		</div>

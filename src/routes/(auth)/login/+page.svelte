@@ -1,10 +1,10 @@
 <script lang="ts">
-	import * as Form from "$lib/components/ui/form/index.js";
-	import { Input } from "$lib/components/ui/input";
-	import { loginSchema } from "$lib/zod-schemas.js";
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import AuthPage from "../auth-page.svelte";
+	import * as Form from "$lib/components/ui/form/index.js";
+	import { Input } from "$lib/components/ui/input";
+	import { loginSchema } from "$lib/zod-schemas.js";
 
 	let { data } = $props();
 
@@ -21,10 +21,10 @@
 		<p class="text-sm text-muted-foreground">Start participating in the conversation.</p>
 	</div>
 	<form method="POST" use:enhance class="w-full space-y-4">
-		<Form.Field {form} name="username">
+		<Form.Field {form} name="email">
 			<Form.Control let:attrs>
-				<Form.Label>Username</Form.Label>
-				<Input type="text" {...attrs} bind:value={$formData.username} />
+				<Form.Label>Email</Form.Label>
+				<Input type="text" {...attrs} bind:value={$formData.email} />
 			</Form.Control>
 			<Form.FieldErrors />
 		</Form.Field>
