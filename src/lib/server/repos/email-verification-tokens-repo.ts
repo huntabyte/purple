@@ -11,8 +11,8 @@ type CreateEmailVerificationTokenProps = {
 export class EmailVerificationTokensRepo {
 	constructor(private readonly db: Database) {}
 
-	getByUserId(userId: string, tx = this.db) {
-		return tx
+	async getByUserId(userId: string, tx = this.db) {
+		return await tx
 			.select()
 			.from(emailVerificationTokensTable)
 			.where(eq(emailVerificationTokensTable.userId, userId))
@@ -25,9 +25,9 @@ export class EmailVerificationTokensRepo {
 			.where(eq(emailVerificationTokensTable.userId, userId));
 	}
 
-	create(props: CreateEmailVerificationTokenProps, tx = this.db) {
+	async create(props: CreateEmailVerificationTokenProps, tx = this.db) {
 		const { expiresAt, token } = generateTokenWithExpiration();
-		return tx
+		return await tx
 			.insert(emailVerificationTokensTable)
 			.values({
 				...props,

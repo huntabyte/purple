@@ -9,12 +9,12 @@ type CreateProfileProps = {
 export class ProfilesRepo {
 	constructor(private readonly db: Database) {}
 
-	getByUserId(userId: string, tx = this.db) {
-		return tx.select().from(profilesTable).where(eq(profilesTable.userId, userId)).get();
+	async getByUserId(userId: string, tx = this.db) {
+		return await tx.select().from(profilesTable).where(eq(profilesTable.userId, userId)).get();
 	}
 
-	create(props: CreateProfileProps, tx = this.db) {
-		return tx.insert(profilesTable).values(props).returning().get();
+	async create(props: CreateProfileProps, tx = this.db) {
+		return await tx.insert(profilesTable).values(props).returning().get();
 	}
 }
 

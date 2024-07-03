@@ -1,9 +1,10 @@
-import { fail, redirect } from "@sveltejs/kit";
+import { error, fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { lucia } from "$lib/server/auth.js";
-import { sendVerificationEmail, verifyEmailToken } from "$lib/server/email-verification.js";
+import { sendVerificationEmail } from "$lib/server/email-verification.js";
 import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "$lib/zod-schemas.js";
+import { isCustomError } from "$lib/errors.js";
+import { authService } from "$lib/server/services/auth-service.js";
 
 export async function load(event) {
 	if (!event.locals.session || !event.locals.user) redirect(303, "/login");
@@ -24,30 +25,33 @@ export const actions = {
 		if (!event.locals.session || !event.locals.user) redirect(303, "/login");
 
 		const form = await superValidate(event, zod(verifyEmailTokenSchema));
-		if (!form.valid) {
-			return fail(400, { form });
-		}
+		if (!form.valid) return fail(400, { form });
 
-		const { expired, invalid } = await verifyEmailToken({
-			user: event.locals.user,
-			token: form.data.token,
-			email: event.locals.user.email,
-		});
-
-		if (expired) {
-			setError(form, "token", "Token has expired. Please request a new one.");
-			return message(form, "EXPIRED", {
-				status: 400,
+		try {
+			const sessionCookie = await authService.verifyEmailToken({
+				user: event.locals.user,
+				token: form.data.token,
+				email: event.locals.user.email,
 			});
-		} else if (invalid) {
-			setError(form, "token", "Invalid token.");
-			return message(form, "INVALID", {
-				status: 400,
-			});
-		}
+			event.locals.setSessionCookie(sessionCookie);
+		} catch (err) {
+			if (isCustomError(err)) {
+				if (err.code === "TOKEN_EXPIRED") {
+					setError(form, "token", "Token has expired. Please request a new one.");
+					return message(form, "EXPIRED", {
+						status: err.status,
+					});
+				}
+				if (err.code === "TOKEN_INVALID") {
+					setError(form, "token", "Invalid token.");
+					return message(form, "INVALID", {
+						status: 400,
+					});
+				}
 
-		await lucia.invalidateUserSessions(event.locals.session.userId);
-		await event.locals.createSession(event.locals.user.id);
+				error(err.status, err.message);
+			}
+		}
 
 		redirect(303, "/");
 	},

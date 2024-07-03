@@ -55,6 +55,7 @@
 	"type": "module",
 	"dependencies": {
 		"@huntabyte/eslint-config": "^0.3.2",
+		"@libsql/client": "^0.7.0",
 		"@types/nodemailer": "^6.4.15",
 		"bits-ui": "^0.21.11",
 		"clsx": "^2.1.1",

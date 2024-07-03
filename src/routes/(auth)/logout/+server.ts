@@ -1,16 +1,10 @@
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { lucia } from "$lib/server/auth";
+import { authService } from "$lib/server/services/auth-service";
 
 export const POST: RequestHandler = async (event) => {
-	if (!event.locals.session) {
-		redirect(302, "/");
-	}
-	await lucia.invalidateSession(event.locals.session.id);
-	const sessionCookie = lucia.createBlankSessionCookie();
-	event.cookies.set(sessionCookie.name, sessionCookie.value, {
-		path: ".",
-		...sessionCookie.attributes,
-	});
+	if (!event.locals.session) redirect(302, "/");
+	const sessionCookie = await authService.logout(event.locals.session.userId);
+	event.locals.setSessionCookie(sessionCookie);
 	redirect(302, "/");
 };

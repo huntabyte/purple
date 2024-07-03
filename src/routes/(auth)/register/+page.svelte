@@ -2,9 +2,9 @@
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import AuthPage from "../auth-page.svelte";
+	import { registerSchema } from "./schemas";
 	import * as Form from "$lib/components/ui/form/index.js";
 	import { Input } from "$lib/components/ui/input";
-	import { registerSchema } from "$lib/zod-schemas.js";
 
 	let { data } = $props();
 
