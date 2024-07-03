@@ -1,27 +1,23 @@
 import { TimeSpan, createDate, isWithinExpirationDate } from "oslo";
 import { alphabet, generateRandomString } from "oslo/crypto";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { User } from "lucia";
 import { sendEmail } from "./email";
-import { db } from "./db";
-import { emailVerificationTokensTable, usersTable } from "./schemas";
-
-async function deleteExistingEmailVerificationTokens(userId: string) {
-	return await db
-		.delete(emailVerificationTokensTable)
-		.where(eq(emailVerificationTokensTable.userId, userId));
-}
+import { db } from "./database/db";
+import { emailVerificationTokensTable, usersTable } from "./database/tables";
+import { emailVerificationTokensRepo } from "./repos/email-verification-tokens-repo";
+import { handleException } from "$lib/errors";
 
 export async function sendVerificationEmail(email: string, userId: string) {
 	/**
 	 * Before sending a new email verification token, delete any existing tokens for
 	 * the email the user is trying to verify.
 	 */
-	await deleteExistingEmailVerificationTokens(userId);
+	await emailVerificationTokensRepo.deleteAllByUserId(userId);
 	const expiresAt = createDate(new TimeSpan(8, "h")).getTime();
 	const token = generateRandomString(6, alphabet("a-z", "0-9"));
 	try {
-		const { dbToken } = db
+		const { dbToken } = await db
 			.insert(emailVerificationTokensTable)
 			.values({
 				userId,
@@ -38,8 +34,8 @@ export async function sendVerificationEmail(email: string, userId: string) {
 			text: `Your verification token is: ${dbToken}`,
 			html: `Your verification token is: <b>${dbToken}</b>`,
 		});
-	} catch {
-		throw new Error("Failed to send email");
+	} catch (err) {
+		throw handleException(err);
 	}
 }
 
@@ -50,11 +46,7 @@ type VerifyEmailTokenParams = {
 };
 
 export async function verifyEmailToken({ user, email, token }: VerifyEmailTokenParams) {
-	const record = db
-		.select()
-		.from(emailVerificationTokensTable)
-		.where(and(eq(emailVerificationTokensTable.userId, user.id)))
-		.get();
+	const record = await emailVerificationTokensRepo.getByUserId(user.id);
 
 	const returnObj = {
 		expired: false,

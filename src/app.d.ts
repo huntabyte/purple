@@ -10,7 +10,7 @@ declare global {
 		interface Locals {
 			user: import("lucia").User | null;
 			session: import("lucia").Session | null;
-			createSession: (userId: string) => Promise<void>;
+			setSessionCookie: (sessionCookie: import("lucia").Cookie) => void;
 		}
 		interface PageData {
 			user: import("lucia").User | null;

@@ -1,13 +1,12 @@
 // src/hooks.server.ts
 import type { Handle } from "@sveltejs/kit";
-import { lucia } from "$lib/server/auth";
+import type { Cookie } from "lucia";
+import { authService } from "$lib/server/services/auth-service";
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const sessionId = event.cookies.get(lucia.sessionCookieName);
+	const sessionId = event.cookies.get(authService.sessionCookieName);
 
-	event.locals.createSession = async (userId: string) => {
-		const session = await lucia.createSession(userId, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
+	event.locals.setSessionCookie = (sessionCookie: Cookie) => {
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
 			path: ".",
 			...sessionCookie.attributes,
@@ -20,9 +19,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return resolve(event);
 	}
 
-	const { session, user } = await lucia.validateSession(sessionId);
+	const { session, user } = await authService.validateSession(sessionId);
 	if (session && session.fresh) {
-		const sessionCookie = lucia.createSessionCookie(session.id);
+		const sessionCookie = authService.createSessionCookie(session.id);
 		// sveltekit types deviates from the de-facto standard
 		// you can use 'as any' too
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
@@ -31,7 +30,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		});
 	}
 	if (!session) {
-		const sessionCookie = lucia.createBlankSessionCookie();
+		const sessionCookie = authService.createBlankSessionCookie();
 		event.cookies.set(sessionCookie.name, sessionCookie.value, {
 			path: ".",
 			...sessionCookie.attributes,
