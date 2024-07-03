@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { type Database, db } from "../database/db";
-import { profilesTable } from "../database/tables";
+import { type InsertProfile, profilesTable } from "../database/tables";
 
 type CreateProfileProps = {
 	userId: string;
@@ -15,6 +15,15 @@ export class ProfilesRepo {
 
 	async create(props: CreateProfileProps, tx = this.db) {
 		return await tx.insert(profilesTable).values(props).returning().get();
+	}
+
+	async update(props: InsertProfile, tx = this.db) {
+		return await tx
+			.update(profilesTable)
+			.set(props)
+			.where(eq(profilesTable.userId, props.userId))
+			.returning()
+			.get();
 	}
 }
 

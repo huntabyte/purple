@@ -10,9 +10,13 @@ import {
 	emailVerificationTokensRepo,
 } from "../repos/email-verification-tokens-repo";
 import { createTransaction } from "../repos/utils";
-import { sendEmail } from "../email";
 import type { User } from "../database/tables";
-
+import {
+	type EmailChangeRequestTokensRepo,
+	emailChangeRequestTokensRepo,
+} from "../repos/email-change-request-tokens-repo";
+import type { EmailService } from "./email-service";
+import { emailService } from "./email-service";
 import { CustomError, handleException } from "$lib/errors";
 
 type RegisterUserProps = {
@@ -31,12 +35,19 @@ type VerifyEmailTokenProps = {
 	token: string;
 };
 
+type VerifyEmailChangeTokenProps = {
+	user: User;
+	token: string;
+};
+
 type AuthServiceDeps = {
 	lucia: Lucia;
 	usersRepo: UsersRepo;
 	accountsRepo: AccountsRepo;
 	profilesRepo: ProfilesRepo;
 	emailVerificationTokensRepo: EmailVerificationTokensRepo;
+	emailChangeRequestTokensRepo: EmailChangeRequestTokensRepo;
+	emailService: EmailService;
 };
 
 export class AuthService {
@@ -167,6 +178,30 @@ export class AuthService {
 		}
 	}
 
+	async verifyChangeEmailToken({ user, token }: VerifyEmailChangeTokenProps) {
+		try {
+			const tokenRecord = await this.deps.emailChangeRequestTokensRepo.getByUserId(user.id);
+
+			if (!tokenRecord || !isWithinExpirationDate(new Date(tokenRecord.expiresAt))) {
+				throw new CustomError("TOKEN_EXPIRED");
+			}
+			if (tokenRecord.token !== token) {
+				throw new CustomError("TOKEN_INVALID");
+			}
+
+			await createTransaction(async (tx) => {
+				await this.deps.emailChangeRequestTokensRepo.deleteByUserId(user.id, tx);
+				await this.deps.usersRepo.updateEmailVerificationStatus({
+					userId: user.id,
+					email: tokenRecord.newEmail,
+					emailVerified: true,
+				});
+			});
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
 	async verifyEmailToken({ user, email, token }: VerifyEmailTokenProps) {
 		try {
 			const tokenRecord = await this.deps.emailVerificationTokensRepo.getByUserId(user.id);
@@ -179,7 +214,7 @@ export class AuthService {
 				throw new CustomError("TOKEN_INVALID");
 			}
 			await createTransaction(async (tx) => {
-				await this.deps.emailVerificationTokensRepo.deleteAllByUserId(user.id, tx);
+				await this.deps.emailVerificationTokensRepo.deleteByUserId(user.id, tx);
 				await this.deps.usersRepo.updateEmailVerificationStatus(
 					{ email, userId: user.id, emailVerified: true },
 					tx
@@ -193,17 +228,30 @@ export class AuthService {
 		}
 	}
 
+	async sendEmailChangeRequestEmail(userId: string, newEmail: string) {
+		try {
+			const { token } = await this.deps.emailChangeRequestTokensRepo.create({
+				userId,
+				newEmail,
+			});
+			await this.deps.emailService.sendEmailChangeRequestEmail({
+				newEmail,
+				token,
+			});
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
 	async sendVerificationEmail(userId: string, email: string) {
 		try {
 			const { token } = await this.deps.emailVerificationTokensRepo.create({
 				userId,
 				email,
 			});
-			await sendEmail({
-				to: email,
-				subject: "Verify your email",
-				text: `Your verification token is: ${token}`,
-				html: `Your verification token is: <b>${token}</b>`,
+			await this.deps.emailService.sendEmailVerificationEmail({
+				email,
+				token,
 			});
 		} catch (err) {
 			throw handleException(err);
@@ -217,4 +265,6 @@ export const authService = new AuthService({
 	accountsRepo,
 	profilesRepo,
 	emailVerificationTokensRepo,
+	emailChangeRequestTokensRepo,
+	emailService,
 });

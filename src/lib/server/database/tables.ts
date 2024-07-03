@@ -74,6 +74,19 @@ export const emailVerificationTokensTable = sqliteTable("email_verification_toke
 	expiresAt: integer("expires_at").notNull(),
 });
 
+export const emailChangeRequestTokensTable = sqliteTable("email_change_request_token", {
+	id: text("id")
+		.notNull()
+		.$defaultFn(() => generateId(15)),
+	userId: text("user_id")
+		.notNull()
+		.references(() => usersTable.id, { onDelete: "cascade" })
+		.unique(),
+	newEmail: text("new_email").notNull(),
+	token: text("token").notNull(),
+	expiresAt: integer("expires_at").notNull(),
+});
+
 /**
  * The `sessions` table is used to store the user's session information.
  */
@@ -86,5 +99,6 @@ export const sessionsTable = sqliteTable("session", {
 });
 
 export type User = typeof usersTable.$inferSelect;
+export type InsertProfile = typeof profilesTable.$inferInsert;
 
 export const sqliteDialect = new SQLiteAsyncDialect();

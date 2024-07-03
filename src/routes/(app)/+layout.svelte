@@ -22,7 +22,7 @@
 					>
 				</div>
 			{:else}
-				<Button href="/account" variant="ghost">Manage Account</Button>
+				<Button href="/settings" variant="ghost">Settings</Button>
 				<form action="/logout" method="POST">
 					<Button type="submit">Logout</Button>
 				</form>
@@ -30,6 +30,6 @@
 		</div>
 	</div>
 </div>
-<div class="container max-w-xl">
+<div class="container">
 	{@render children?.()}
 </div>

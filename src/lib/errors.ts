@@ -1,5 +1,6 @@
 import { LibsqlError } from "@libsql/client";
 import { ERROR_MESSAGES } from "./server/constants";
+import { logger } from "./server/logger";
 
 type HttpErrorCode =
 	| "BAD_REQUEST"
@@ -28,7 +29,8 @@ type CustomErrorCode =
 	| "USER_ALREADY_EXISTS"
 	| "CREATE_USER_ERROR"
 	| "TOKEN_EXPIRED"
-	| "TOKEN_INVALID";
+	| "TOKEN_INVALID"
+	| "SEND_EMAIL_ERROR";
 
 export type ErrorCode = HttpErrorCode | CustomErrorCode;
 
@@ -69,6 +71,7 @@ const errorCodeToStatusMap: Record<ErrorCode, ErrorStatus> = {
 	CREATE_USER_ERROR: 500,
 	TOKEN_EXPIRED: 401,
 	TOKEN_INVALID: 401,
+	SEND_EMAIL_ERROR: 500,
 };
 
 export function getStatusFromErrorCode(code: ErrorCode): ErrorStatus {
@@ -100,6 +103,8 @@ export function getMessageFromErrorCode(code: ErrorCode): string {
 			return ERROR_MESSAGES.USER_ALREADY_EXISTS;
 		case "CREATE_USER_ERROR":
 			return ERROR_MESSAGES.CREATE_USER_ERROR;
+		case "SEND_EMAIL_ERROR":
+			return "An error occurred while sending the email.";
 		default:
 			return "An internal server error occurred.";
 	}
@@ -129,7 +134,7 @@ export function isLibSqlError(error: unknown): error is LibsqlError {
 }
 
 export function handleException(error: unknown): CustomError {
-	console.error(error);
+	logger.error(error);
 	if (isCustomError(error)) {
 		return error;
 	}

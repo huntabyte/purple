@@ -4,17 +4,18 @@ import type { ProfilesRepo } from "../repos/profiles-repo";
 import { profilesRepo } from "../repos/profiles-repo";
 import type { EmailVerificationTokensRepo } from "../repos/email-verification-tokens-repo";
 import { emailVerificationTokensRepo } from "../repos/email-verification-tokens-repo";
-import { sendEmail } from "../email";
-import type { User } from "../database/tables";
+import type { InsertProfile } from "../database/tables";
+import { type EmailService, emailService } from "./email-service";
 import type { UsersRepo } from "$lib/server/repos/users-repo";
 import { usersRepo } from "$lib/server/repos/users-repo";
-import { handleException } from "$lib/errors";
+import { CustomError, handleException } from "$lib/errors";
 
 type UsersServiceDeps = {
 	usersRepo: UsersRepo;
 	emailVerificationTokensRepo: EmailVerificationTokensRepo;
 	accountsRepo: AccountsRepo;
 	profilesRepo: ProfilesRepo;
+	emailService: EmailService;
 };
 
 class UsersService {
@@ -28,6 +29,26 @@ class UsersService {
 			throw handleException(err);
 		}
 	}
+
+	async getProfileByUserId(userId: string) {
+		try {
+			const profile = await this.deps.profilesRepo.getByUserId(userId);
+			if (!profile) throw new CustomError("NOT_FOUND");
+			return profile;
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
+	async updateProfile({ userId, displayName, bio }: InsertProfile) {
+		try {
+			return await this.deps.profilesRepo.update({ userId, displayName, bio });
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
+	async changeEmailRequest();
 }
 
 export const usersService = new UsersService({
@@ -35,4 +56,5 @@ export const usersService = new UsersService({
 	accountsRepo,
 	usersRepo,
 	emailVerificationTokensRepo,
+	emailService,
 });

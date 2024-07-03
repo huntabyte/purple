@@ -19,7 +19,7 @@ export class EmailVerificationTokensRepo {
 			.get();
 	}
 
-	async deleteAllByUserId(userId: string, tx = this.db) {
+	async deleteByUserId(userId: string, tx = this.db) {
 		return await tx
 			.delete(emailVerificationTokensTable)
 			.where(eq(emailVerificationTokensTable.userId, userId));
