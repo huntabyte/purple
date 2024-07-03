@@ -1,5 +1,5 @@
 import { Lucia } from "lucia";
-import { adapter } from "./db.js";
+import { adapter } from "./database/db.js";
 import { dev } from "$app/environment";
 
 export const lucia = new Lucia(adapter, {

@@ -2,7 +2,7 @@ import { type InferSelectModel, sql } from "drizzle-orm";
 import { SQLiteAsyncDialect, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { generateId } from "lucia";
 
-const timestamps = {
+const defaultTimestamps = {
 	createdAt: text("created_at")
 		.notNull()
 		.default(sql`CURRENT_TIMESTAMP`),
@@ -11,11 +11,19 @@ const timestamps = {
 		.default(sql`CURRENT_TIMESTAMP`),
 };
 
+/**
+ * The `users` table represents the minimal information needed to identify a user. It also
+ * serves as the single source of truth for the user's ID which is used for references in
+ * other tables.
+ */
 export const usersTable = sqliteTable("user", {
-	id: text("id").notNull().primaryKey(),
+	id: text("id")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => generateId(15)),
 	email: text("email").notNull().unique(),
 	emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
-	...timestamps,
+	...defaultTimestamps,
 });
 
 /**
@@ -29,9 +37,28 @@ export const accountsTable = sqliteTable("account", {
 	id: text("id")
 		.notNull()
 		.primaryKey()
-		.references(() => usersTable.id),
+		.$defaultFn(() => generateId(15)),
+	userId: text("user_id")
+		.notNull()
+		.references(() => usersTable.id, { onDelete: "cascade" }),
 	hashedPassword: text("hashed_password").notNull(),
-	...timestamps,
+	...defaultTimestamps,
+});
+
+/**
+ * The `profiles` table is used to store the user's public profile information.
+ */
+export const profilesTable = sqliteTable("profile", {
+	id: text("id")
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => generateId(15)),
+	userId: text("user_id")
+		.notNull()
+		.references(() => usersTable.id, { onDelete: "cascade" }),
+	displayName: text("display_name"),
+	bio: text("bio"),
+	...defaultTimestamps,
 });
 
 export const emailVerificationTokensTable = sqliteTable("email_verification_token", {
@@ -40,7 +67,7 @@ export const emailVerificationTokensTable = sqliteTable("email_verification_toke
 		.$defaultFn(() => generateId(15)),
 	userId: text("user_id")
 		.notNull()
-		.references(() => usersTable.id)
+		.references(() => usersTable.id, { onDelete: "cascade" })
 		.unique(),
 	email: text("email").notNull(),
 	token: text("token").notNull(),
@@ -48,20 +75,16 @@ export const emailVerificationTokensTable = sqliteTable("email_verification_toke
 });
 
 /**
- * Sessions are used to store the user's session information.
+ * The `sessions` table is used to store the user's session information.
  */
 export const sessionsTable = sqliteTable("session", {
 	id: text("id").notNull().primaryKey(),
 	userId: text("user_id")
 		.notNull()
-		.references(() => usersTable.id),
+		.references(() => usersTable.id, { onDelete: "cascade" }),
 	expiresAt: integer("expires_at").notNull(),
 });
 
-export type User = InferSelectModel<typeof usersTable>;
-
-export type CommentWithUser = Comment & {
-	user: User;
-};
+export type User = typeof usersTable.$inferSelect;
 
 export const sqliteDialect = new SQLiteAsyncDialect();

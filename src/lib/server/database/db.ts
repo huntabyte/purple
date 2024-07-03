@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/better-sqlite3";
 import { DrizzleSQLiteAdapter } from "@lucia-auth/adapter-drizzle";
 import SQLite from "better-sqlite3";
-import * as schema from "./schemas";
+import * as schema from "./tables";
 
 const sqlite = new SQLite("db.sqlite");
 

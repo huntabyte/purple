@@ -3,8 +3,8 @@ import { alphabet, generateRandomString } from "oslo/crypto";
 import { and, eq } from "drizzle-orm";
 import type { User } from "lucia";
 import { sendEmail } from "./email";
-import { db } from "./db";
-import { emailVerificationTokensTable, usersTable } from "./schemas";
+import { db } from "./database/db";
+import { emailVerificationTokensTable, usersTable } from "./database/tables";
 
 async function deleteExistingEmailVerificationTokens(userId: string) {
 	return await db
