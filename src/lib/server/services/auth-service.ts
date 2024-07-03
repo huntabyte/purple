@@ -41,6 +41,7 @@ type AuthServiceDeps = {
 
 export class AuthService {
 	sessionCookieName: string;
+	argon = new Argon2id();
 
 	constructor(private readonly deps: AuthServiceDeps) {
 		this.sessionCookieName = this.deps.lucia.sessionCookieName;
@@ -48,7 +49,7 @@ export class AuthService {
 
 	private async hashPassword(password: string) {
 		try {
-			const hash = await new Argon2id().hash(password);
+			const hash = await this.argon.hash(password);
 			return hash;
 		} catch (err) {
 			throw handleException(err);
@@ -57,7 +58,7 @@ export class AuthService {
 
 	private async verifyPassword(hashedPassword: string, password: string) {
 		try {
-			const verify = await new Argon2id().verify(hashedPassword, password);
+			const verify = await this.argon.verify(hashedPassword, password);
 			return verify;
 		} catch (err) {
 			throw handleException(err);
@@ -109,7 +110,7 @@ export class AuthService {
 
 	private async invalidateSession(sessionId: string) {
 		try {
-			await this.invalidateSession(sessionId);
+			await this.deps.lucia.invalidateSession(sessionId);
 			return this.createBlankSessionCookie();
 		} catch (err) {
 			throw handleException(err);
@@ -133,7 +134,7 @@ export class AuthService {
 			const account = await this.deps.accountsRepo.getByUserId(user.id);
 			if (!account) throw new CustomError("INTERNAL_ERROR");
 
-			const validPassword = await this.verifyPassword(props.password, account.hashedPassword);
+			const validPassword = await this.verifyPassword(account.hashedPassword, props.password);
 			if (!validPassword) throw new CustomError("INVALID_CREDENTIALS");
 
 			const sessionCookie = await this.createSessionAndCookie(user.id);

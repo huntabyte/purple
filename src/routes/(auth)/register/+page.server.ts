@@ -26,7 +26,6 @@ export const actions = {
 		try {
 			const sessionCookie = await authService.register(form.data);
 			event.locals.setSessionCookie(sessionCookie);
-			redirect(302, "/verify-email");
 		} catch (err) {
 			const e = handleException(err);
 			if (e.code === "USER_ALREADY_EXISTS") {
@@ -34,5 +33,6 @@ export const actions = {
 			}
 			return message(form, e.message, { status: e.status });
 		}
+		redirect(302, "/verify-email");
 	},
 };
