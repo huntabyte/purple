@@ -2,7 +2,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import type { Actions } from "./$types";
-import { loginSchema } from "$lib/zod-schemas";
+import { loginSchema } from "./schemas";
 import { handleException } from "$lib/errors";
 import { authService } from "$lib/server/services/auth-service";
 

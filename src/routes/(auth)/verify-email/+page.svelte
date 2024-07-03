@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
-	import { verifyEmailTokenSchema } from "$lib/zod-schemas.js";
+	import { verifyEmailTokenSchema } from "./schemas";
 	import * as Form from "$lib/components/ui/form";
 	import { Input } from "$lib/components/ui/input";
 

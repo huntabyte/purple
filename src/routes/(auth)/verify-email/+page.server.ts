@@ -1,8 +1,7 @@
 import { error, fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { sendVerificationEmail } from "$lib/server/email-verification.js";
-import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "$lib/zod-schemas.js";
+import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "./schemas.js";
 import { isCustomError } from "$lib/errors.js";
 import { authService } from "$lib/server/services/auth-service.js";
 
@@ -60,7 +59,7 @@ export const actions = {
 		const form = await superValidate(event, zod(newEmailVerificationTokenSchema));
 
 		try {
-			await sendVerificationEmail(event.locals.user.email, event.locals.user.id);
+			await authService.sendVerificationEmail(event.locals.user.email, event.locals.user.id);
 		} catch {
 			return fail(500, { form });
 		}
