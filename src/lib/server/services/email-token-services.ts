@@ -5,6 +5,7 @@ import {
 	emailChangeTokensRepo,
 	emailVerifyTokensRepo,
 } from "../repos/email-token-repos";
+import { logger } from "../logger";
 import { CustomError, handleException, isCustomError } from "$lib/errors";
 
 type EmailTokenServiceDeps = {
@@ -57,6 +58,7 @@ export class EmailTokenService {
 				token,
 			});
 		} catch (err) {
+			logger.error(err);
 			if (isCustomError(err)) throw err;
 			throw new CustomError("TOKEN_ISSUE_ERROR");
 		}

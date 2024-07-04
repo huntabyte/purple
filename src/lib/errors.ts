@@ -109,6 +109,10 @@ export function getMessageFromErrorCode(code: ErrorCode): string {
 			return ERROR_MESSAGES.CREATE_USER_ERROR;
 		case "SEND_EMAIL_ERROR":
 			return "An error occurred while sending the email.";
+		case "TOKEN_EXPIRED":
+			return "Your token has expired. Please request a new one.";
+		case "TOKEN_INVALID":
+			return "The token you provided is invalid. Please try again or request a new one.";
 		default:
 			return "An internal server error occurred.";
 	}

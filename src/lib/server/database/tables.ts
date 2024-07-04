@@ -1,4 +1,4 @@
-import { type InferSelectModel, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { SQLiteAsyncDialect, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { generateId } from "lucia";
 
@@ -28,10 +28,7 @@ export const usersTable = sqliteTable("user", {
 
 /**
  * The `accounts` table is used to store the user's more sensitive account
- * information, such as their email, phone, address, billing information, etc.
- *
- * We separate this from the `users` table to avoid accidentally leaking sensitive
- * information when querying the `users` table for general user information.
+ * information, such as their password and other credentials.
  */
 export const accountsTable = sqliteTable("account", {
 	id: text("id")

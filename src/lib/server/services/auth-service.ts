@@ -272,6 +272,12 @@ export class AuthService {
 				});
 			});
 
+			// Send a courtesy email to the original email address to notify them of the change.
+			await this.deps.emailService.sendEmailChangeNotificationEmail({
+				originalEmail: user.email,
+				newEmail: tokenRecord.email,
+			});
+
 			await this.invalidateUserSessions(user.id);
 			return await this.createSessionAndCookie(user.id);
 		} catch (err) {
