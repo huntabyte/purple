@@ -1,17 +1,31 @@
 <script lang="ts">
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
-	import { type SuperValidatedUpdateProfile, updateProfileSchema } from "./schemas";
+	import { toast } from "svelte-sonner";
+	import { type SVUpdateProfile, updateProfileSchema } from "./schemas";
 	import * as Card from "$lib/components/ui/card";
 	import { Button } from "$lib/components/ui/button";
 	import { Input } from "$lib/components/ui/input";
 	import { Textarea } from "$lib/components/ui/textarea";
 	import * as Form from "$lib/components/ui/form";
 
-	let { updateProfileForm }: { updateProfileForm: SuperValidatedUpdateProfile } = $props();
+	type Props = {
+		updateProfileForm: SVUpdateProfile;
+	};
+
+	let { updateProfileForm }: Props = $props();
 
 	const form = superForm(updateProfileForm, {
 		validators: zodClient(updateProfileSchema),
+		resetForm: false,
+		onUpdate: ({ result, form }) => {
+			if (!form.message) return;
+			if (result.type === "success") {
+				toast.success(form.message.text);
+			} else {
+				toast.error(form.message.text);
+			}
+		},
 	});
 	const { form: formData, enhance } = form;
 </script>

@@ -278,11 +278,14 @@ export class AuthService {
 
 			await createTransaction(async (tx) => {
 				await this.deps.emailChangeTokensService.revokeTokenByUserId({ userId: user.id }, tx);
-				await this.deps.usersRepo.updateEmailVerificationStatus({
-					userId: user.id,
-					email: tokenRecord.email,
-					emailVerified: true,
-				});
+				await this.deps.usersRepo.updateEmailVerificationStatus(
+					{
+						userId: user.id,
+						email: tokenRecord.email,
+						emailVerified: true,
+					},
+					tx
+				);
 			});
 
 			// Send a courtesy email to the original email address to notify them of the change.
@@ -374,6 +377,24 @@ export class AuthService {
 
 			await this.verifyUserPassword({ userId, password });
 			await this.sendEmailChangeRequestEmail({ userId, email: newEmail });
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
+	async getEmailChangeRequestStatus(userId: string) {
+		try {
+			const token = await this.deps.emailChangeTokensService.getTokenByUserId(userId);
+			if (!token) return false;
+			return true;
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
+	async cancelEmailChangeRequest(userId: string) {
+		try {
+			await this.deps.emailChangeTokensService.revokeTokenByUserId({ userId });
 		} catch (err) {
 			throw handleException(err);
 		}

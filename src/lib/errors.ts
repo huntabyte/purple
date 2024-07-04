@@ -141,6 +141,9 @@ export function isLibSqlError(error: unknown): error is LibsqlError {
 	return error instanceof LibsqlError;
 }
 
+/**
+ * Normalize any error into a CustomError.
+ */
 export function handleException(error: unknown): CustomError {
 	logger.error(error);
 	if (isCustomError(error)) {

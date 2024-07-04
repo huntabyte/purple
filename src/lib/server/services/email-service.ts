@@ -1,5 +1,6 @@
 import { type EmailClient, emailClient } from "../email-client";
 import { handleException } from "$lib/errors";
+import { BASE_URL } from "$env/static/private";
 
 type SendEmailVerificationEmailProps = {
 	email: string;
@@ -49,8 +50,8 @@ export class EmailService {
 			const messageId = await this.client.sendEmail({
 				to: newEmail,
 				subject: "Confirm your email change",
-				text: `Your email change verification token is: ${token}`,
-				html: `<p>Your email change verification token is: <b>${token}</b></p>`,
+				text: `Your email change verification token is: ${token}. Enter the verification token here: ${BASE_URL}/settings/verify-email-change`,
+				html: `<p>Your email change verification token is: <b>${token}</b></p><a href="${BASE_URL}/settings/verify-email-change">Enter the verification token here</a>`,
 			});
 			return messageId;
 		} catch (err) {
