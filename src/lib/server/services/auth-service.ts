@@ -69,6 +69,9 @@ export class AuthService {
 		this.sessionCookieName = this.deps.lucia.sessionCookieName;
 	}
 
+	/**
+	 * Hashes a password using Argon2id.
+	 */
 	private async hashPassword(password: string) {
 		try {
 			const hash = await this.argon.hash(password);
@@ -78,6 +81,9 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Verifies a password against a hashed password.
+	 */
 	private async verifyPassword(hashedPassword: string, password: string) {
 		try {
 			const verify = await this.argon.verify(hashedPassword, password);
@@ -87,6 +93,10 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Creates a new session for a user. If a session ID is provided, the session is created with
+	 * that ID. If no session ID is provided, a new session ID is generated.
+	 */
 	async createSession(userId: string, sessionId?: string) {
 		try {
 			const session = await this.deps.lucia.createSession(userId, { sessionId });
@@ -96,14 +106,23 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Creates a new session cookie for a session ID.
+	 */
 	createSessionCookie(sessionId: string) {
 		return this.deps.lucia.createSessionCookie(sessionId);
 	}
 
+	/**
+	 * Creates a new blank session cookie.
+	 */
 	createBlankSessionCookie() {
 		return this.deps.lucia.createBlankSessionCookie();
 	}
 
+	/**
+	 * Validates a session by its session ID.
+	 */
 	async validateSession(sessionId: string) {
 		try {
 			const session = await this.deps.lucia.validateSession(sessionId);
@@ -113,6 +132,10 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Creates a new session and session cookie for a user. If a session ID is provided, the
+	 * session is created with that ID. If no session ID is provided, a new session ID is
+	 */
 	async createSessionAndCookie(userId: string, sessionId?: string) {
 		try {
 			const session = await this.createSession(userId, sessionId);
@@ -122,6 +145,9 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Invalidates all sessions for a user.
+	 */
 	async invalidateUserSessions(userId: string) {
 		try {
 			await this.deps.lucia.invalidateUserSessions(userId);
@@ -130,6 +156,9 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Invalidates a session by its session ID. A new blank session cookie is returned.
+	 */
 	private async invalidateSession(sessionId: string) {
 		try {
 			await this.deps.lucia.invalidateSession(sessionId);
@@ -139,6 +168,10 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Logs out a user by invalidating their session. A new blank session cookie is returned.
+	 * This method does not invalidate any other sessions the user may have.
+	 */
 	async logout(sessionId: string) {
 		try {
 			await this.invalidateSession(sessionId);
@@ -148,6 +181,23 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Logs out a user by invalidating all of their sessions. A new blank session cookie is
+	 * returned to be applied to the response.
+	 */
+	async logoutAll(userId: string) {
+		try {
+			await this.invalidateUserSessions(userId);
+			return this.createBlankSessionCookie();
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
+	/**
+	 * Logs in a user by verifying their email and password. If successful, a session cookie is
+	 * created and returned.
+	 */
 	async login(props: LoginUserProps) {
 		try {
 			const user = await this.deps.usersRepo.getByEmail(props.email);
@@ -166,6 +216,10 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Registers a new user by creating a new user, account, and profile record. A verification
+	 * email is sent to the user's email address to verify their email.
+	 */
 	async register(props: RegisterUserProps) {
 		try {
 			const userExists = await this.deps.usersRepo.getByEmail(props.email);
@@ -193,6 +247,11 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Verifies a user's request to change their email address. If successful, the user's email
+	 * address is updated, their email is marked as verified, and any existing sessions are
+	 * invalidated. A new session cookie is created and returned.
+	 */
 	async verifyChangeEmailToken({ user, token }: VerifyEmailChangeTokenProps) {
 		try {
 			const tokenRecord = await this.deps.emailChangeTokensService.getTokenByUserId(user.id);
@@ -212,11 +271,19 @@ export class AuthService {
 					emailVerified: true,
 				});
 			});
+
+			await this.invalidateUserSessions(user.id);
+			return await this.createSessionAndCookie(user.id);
 		} catch (err) {
 			throw handleException(err);
 		}
 	}
 
+	/**
+	 * Verifies a user's initial email address. If successful, the user's email is marked
+	 * as verified, and any existing sessions are invalidated. A new session cookie is
+	 * created and returned.
+	 */
 	async verifyEmailToken({ user, email, token }: VerifyEmailTokenProps) {
 		try {
 			const tokenRecord = await this.deps.emailVerifyTokensService.getTokenByUserId(user.id);
@@ -243,6 +310,10 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Sends a verification email to the email address the user is attempting to change to.
+	 * This is used to verify the new email address when a user requests to change their email.
+	 */
 	private async sendEmailChangeRequestEmail(props: SendEmailChangeRequestEmailProps) {
 		try {
 			const { token } = await this.deps.emailChangeTokensService.issueToken(props);
@@ -255,6 +326,9 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Sends a verification email to the email address the user registered their account with.
+	 */
 	private async sendVerificationEmail(props: SendVerificationEmailProps) {
 		try {
 			const { token } = await this.deps.emailVerifyTokensService.issueToken(props);
@@ -267,6 +341,12 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Handles a user's request to change their email address. This method sends a verification
+	 * email to the new email address and revokes any existing email change tokens for the user.
+	 * The user's email address is not updated until the email change token is verified.
+	 * This method does not invalidate any existing sessions.
+	 */
 	async requestEmailChange({ newEmail, userId }: RequestEmailChangeProps) {
 		try {
 			const emailExists = await this.deps.usersRepo.getByEmail(newEmail);
