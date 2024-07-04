@@ -1,10 +1,12 @@
 <script lang="ts">
+	import VerifyEmailBanner from "./verify-email-banner.svelte";
 	import { Button } from "$lib/components/ui/button";
 	import { page } from "$app/stores";
 
 	let { data, children } = $props();
 </script>
 
+<VerifyEmailBanner user={data.user} />
 <div class="flex h-16 w-full items-center border-b">
 	<div class="container flex items-center justify-between">
 		<div>

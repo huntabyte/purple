@@ -2,6 +2,7 @@
 
 import type { Infer, SuperValidated } from "sveltekit-superforms";
 import type { updatePostSchema } from "./lib/zod-schemas";
+import type { ErrorCode } from "$lib/errors";
 
 // for information about these interfaces
 declare global {
@@ -22,7 +23,16 @@ declare global {
 				dialog: boolean;
 			};
 		}
+
+		// interface Error {}
 		// interface Platform {}
+		namespace Superforms {
+			type Message = {
+				code?: ErrorCode;
+				type: "error" | "success";
+				text: string;
+			};
+		}
 	}
 }
 

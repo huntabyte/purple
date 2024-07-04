@@ -335,7 +335,7 @@ export class AuthService {
 	/**
 	 * Sends a verification email to the email address the user registered their account with.
 	 */
-	private async sendVerificationEmail(props: SendVerificationEmailProps) {
+	async sendVerificationEmail(props: SendVerificationEmailProps) {
 		try {
 			const { token } = await this.deps.emailVerifyTokensService.issueToken(props);
 			await this.deps.emailService.sendEmailVerificationEmail({

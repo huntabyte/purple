@@ -17,6 +17,13 @@
 	const { enhance: newEnhance } = newForm;
 </script>
 
+{#snippet NewTokenForm(props: { message: string })}
+	<form method="POST" action="?/newToken" use:newEnhance class="w-full space-y-4">
+		<p>{props.message}</p>
+		<Form.Button class="w-full">Request new token</Form.Button>
+	</form>
+{/snippet}
+
 <div
 	class="container relative hidden h-full flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0"
 >
@@ -50,11 +57,8 @@
 				</p>
 			</div>
 
-			{#if String($verifyMessage) === "EXPIRED"}
-				<form method="POST" action="?/newToken" use:newEnhance class="w-full space-y-4">
-					<p>Your token has expired.</p>
-					<Form.Button class="w-full">Request new token</Form.Button>
-				</form>
+			{#if $verifyMessage && $verifyMessage.code === "TOKEN_EXPIRED"}
+				{@render NewTokenForm({ message: $verifyMessage.text })}
 			{:else}
 				<form method="POST" action="?/verifyToken" use:verifyEnhance class="w-full space-y-4">
 					<Form.Field form={verifyForm} name="token">
@@ -66,6 +70,9 @@
 					</Form.Field>
 					<Form.Button class="w-full">Verify email</Form.Button>
 				</form>
+				{#if $verifyMessage && $verifyMessage.code === "TOKEN_INVALID"}
+					{@render NewTokenForm({ message: $verifyMessage.text })}
+				{/if}
 			{/if}
 		</div>
 	</div>

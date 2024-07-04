@@ -4,6 +4,7 @@ import { zod } from "sveltekit-superforms/adapters";
 import { newEmailVerificationTokenSchema, verifyEmailTokenSchema } from "./schemas.js";
 import { isCustomError } from "$lib/errors.js";
 import { authService } from "$lib/server/services/auth-service.js";
+import { createMessage } from "$lib/helpers.js";
 
 export async function load(event) {
 	if (!event.locals.session || !event.locals.user) redirect(303, "/login");
@@ -35,16 +36,20 @@ export const actions = {
 			event.locals.setSessionCookie(sessionCookie);
 		} catch (err) {
 			if (isCustomError(err)) {
+				const msg = createMessage({
+					code: err.code,
+					type: "error",
+					text: err.message,
+				});
 				if (err.code === "TOKEN_EXPIRED") {
-					setError(form, "token", "Token has expired. Please request a new one.");
-					return message(form, "EXPIRED", {
+					return message(form, msg, {
 						status: err.status,
 					});
 				}
 				if (err.code === "TOKEN_INVALID") {
 					setError(form, "token", "Invalid token.");
-					return message(form, "INVALID", {
-						status: 400,
+					return message(form, msg, {
+						status: err.status,
 					});
 				}
 
@@ -59,8 +64,19 @@ export const actions = {
 		const form = await superValidate(event, zod(newEmailVerificationTokenSchema));
 
 		try {
-			await authService.sendVerificationEmail(event.locals.user.email, event.locals.user.id);
-		} catch {
+			await authService.sendVerificationEmail({
+				email: event.locals.user.email,
+				userId: event.locals.user.id,
+			});
+		} catch (err) {
+			if (isCustomError(err)) {
+				const msg = createMessage({
+					code: err.code,
+					type: "error",
+					text: err.message,
+				});
+				return message(form, msg, { status: err.status });
+			}
 			return fail(500, { form });
 		}
 
