@@ -8,6 +8,8 @@ export const updateProfileSchema = z.object({
 
 export const updateEmailSchema = z.object({
 	email: z.string().email(),
+	password: z.string(),
 });
 
 export type SuperValidatedUpdateProfile = SuperValidated<Infer<typeof updateProfileSchema>>;
+export type SuperValidatedUpdateEmail = SuperValidated<Infer<typeof updateEmailSchema>>;

@@ -1,9 +1,10 @@
 import { type Actions, redirect } from "@sveltejs/kit";
 import { fail, message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { updateProfileSchema } from "./schemas.js";
+import { updateEmailSchema, updateProfileSchema } from "./schemas.js";
 import { usersService } from "$lib/server/services/users-service.js";
 import { handleException } from "$lib/errors.js";
+import { createMessage } from "$lib/helpers.js";
 
 export async function load(event) {
 	if (!event.locals.session) redirect(302, "/login");
@@ -12,10 +13,14 @@ export async function load(event) {
 		usersService.getProfileByUserId(event.locals.session.userId),
 	]);
 
-	const [updateProfileForm] = await Promise.all([superValidate(profile, zod(updateProfileSchema))]);
+	const [updateProfileForm, updateEmailForm] = await Promise.all([
+		superValidate(profile, zod(updateProfileSchema)),
+		superValidate(zod(updateEmailSchema)),
+	]);
 
 	return {
 		updateProfileForm,
+		updateEmailForm,
 	};
 }
 
@@ -36,7 +41,9 @@ export const actions: Actions = {
 			});
 		} catch (err) {
 			const e = handleException(err);
-			return message(form, e.message, { status: e.status });
+			return message(form, createMessage({ code: e.code, text: e.message, type: "error" }), {
+				status: e.status,
+			});
 		}
 
 		return { form };

@@ -49,6 +49,12 @@ type SendEmailChangeRequestEmailProps = {
 type RequestEmailChangeProps = {
 	userId: string;
 	newEmail: string;
+	password: string;
+};
+
+type VerifyUserPasswordProps = {
+	password: string;
+	userId: string;
 };
 
 type AuthServiceDeps = {
@@ -194,6 +200,18 @@ export class AuthService {
 		}
 	}
 
+	private async verifyUserPassword(props: VerifyUserPasswordProps) {
+		try {
+			const account = await this.deps.accountsRepo.getByUserId(props.userId);
+			if (!account) throw new CustomError("INTERNAL_ERROR");
+
+			const validPassword = await this.verifyPassword(account.hashedPassword, props.password);
+			if (!validPassword) throw new CustomError("INVALID_CREDENTIALS");
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
 	/**
 	 * Logs in a user by verifying their email and password. If successful, a session cookie is
 	 * created and returned.
@@ -203,12 +221,7 @@ export class AuthService {
 			const user = await this.deps.usersRepo.getByEmail(props.email);
 			if (!user) throw new CustomError("INVALID_CREDENTIALS");
 
-			const account = await this.deps.accountsRepo.getByUserId(user.id);
-			if (!account) throw new CustomError("INTERNAL_ERROR");
-
-			const validPassword = await this.verifyPassword(account.hashedPassword, props.password);
-			if (!validPassword) throw new CustomError("INVALID_CREDENTIALS");
-
+			await this.verifyUserPassword({ userId: user.id, password: props.password });
 			const sessionCookie = await this.createSessionAndCookie(user.id);
 			return sessionCookie;
 		} catch (err) {
@@ -348,15 +361,18 @@ export class AuthService {
 	}
 
 	/**
-	 * Handles a user's request to change their email address. This method sends a verification
-	 * email to the new email address and revokes any existing email change tokens for the user.
-	 * The user's email address is not updated until the email change token is verified.
-	 * This method does not invalidate any existing sessions.
+	 * Handles a user's request to change their email address. We require the user's password
+	 * to verify the request. If successful, a verification email is sent to the new email address
+	 * and revokes any existing email change tokens for the user. The user's email address is not
+	 * updated until the email change token is verified. This method does not invalidate any
+	 * existing sessions. The session invalidation occurs after the email change token is verified.
 	 */
-	async requestEmailChange({ newEmail, userId }: RequestEmailChangeProps) {
+	async requestEmailChange({ newEmail, userId, password }: RequestEmailChangeProps) {
 		try {
 			const emailExists = await this.deps.usersRepo.getByEmail(newEmail);
 			if (emailExists) throw new CustomError("USER_ALREADY_EXISTS");
+
+			await this.verifyUserPassword({ userId, password });
 			await this.sendEmailChangeRequestEmail({ userId, email: newEmail });
 		} catch (err) {
 			throw handleException(err);
