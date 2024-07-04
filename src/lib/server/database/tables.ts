@@ -61,31 +61,21 @@ export const profilesTable = sqliteTable("profile", {
 	...defaultTimestamps,
 });
 
-export const emailVerificationTokensTable = sqliteTable("email_verification_token", {
+const sharedEmailTokenColumns = {
 	id: text("id")
 		.notNull()
+		.primaryKey()
 		.$defaultFn(() => generateId(15)),
 	userId: text("user_id")
 		.notNull()
-		.references(() => usersTable.id, { onDelete: "cascade" })
-		.unique(),
+		.references(() => usersTable.id, { onDelete: "cascade" }),
 	email: text("email").notNull(),
 	token: text("token").notNull(),
 	expiresAt: integer("expires_at").notNull(),
-});
+};
 
-export const emailChangeRequestTokensTable = sqliteTable("email_change_request_token", {
-	id: text("id")
-		.notNull()
-		.$defaultFn(() => generateId(15)),
-	userId: text("user_id")
-		.notNull()
-		.references(() => usersTable.id, { onDelete: "cascade" })
-		.unique(),
-	newEmail: text("new_email").notNull(),
-	token: text("token").notNull(),
-	expiresAt: integer("expires_at").notNull(),
-});
+export const emailVerifyTokensTable = sqliteTable("email_verify_token", sharedEmailTokenColumns);
+export const emailChangeTokensTable = sqliteTable("email_change_token", sharedEmailTokenColumns);
 
 /**
  * The `sessions` table is used to store the user's session information.
@@ -102,3 +92,5 @@ export type User = typeof usersTable.$inferSelect;
 export type InsertProfile = typeof profilesTable.$inferInsert;
 
 export const sqliteDialect = new SQLiteAsyncDialect();
+
+export type EmailTokenRecord = typeof emailVerifyTokensTable.$inferSelect;

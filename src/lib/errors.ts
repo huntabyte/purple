@@ -30,7 +30,9 @@ type CustomErrorCode =
 	| "CREATE_USER_ERROR"
 	| "TOKEN_EXPIRED"
 	| "TOKEN_INVALID"
-	| "SEND_EMAIL_ERROR";
+	| "SEND_EMAIL_ERROR"
+	| "TOKEN_ISSUE_ERROR"
+	| "TOKEN_REVOKE_ERROR";
 
 export type ErrorCode = HttpErrorCode | CustomErrorCode;
 
@@ -72,6 +74,8 @@ const errorCodeToStatusMap: Record<ErrorCode, ErrorStatus> = {
 	TOKEN_EXPIRED: 401,
 	TOKEN_INVALID: 401,
 	SEND_EMAIL_ERROR: 500,
+	TOKEN_ISSUE_ERROR: 500,
+	TOKEN_REVOKE_ERROR: 500,
 };
 
 export function getStatusFromErrorCode(code: ErrorCode): ErrorStatus {
