@@ -2,7 +2,7 @@
 	import { superForm } from "sveltekit-superforms";
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import { toast } from "svelte-sonner";
-	import { type SVVerifyEmailChange, verifyEmailChangeSchema } from "./schemas";
+	import { type SVVerifyEmailChange, verifyEmailChangeSchema } from "../schemas";
 	import * as Form from "$lib/components/ui/form";
 	import { Input } from "$lib/components/ui/input";
 	import { Button } from "$lib/components/ui/button";

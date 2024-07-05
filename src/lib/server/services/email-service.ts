@@ -79,6 +79,23 @@ export class EmailService {
 			throw handleException(err);
 		}
 	}
+
+	/**
+	 * Sends an email to the user letting them know that their password has been changed.
+	 */
+	async sendPasswordChangeNotificationEmail(email: string) {
+		try {
+			const messageId = await this.client.sendEmail({
+				to: email,
+				subject: "Password Changed",
+				text: `Your password has been changed. If you did not request this change, please contact support.`,
+				html: `<p>Your password has been changed. If you did not request this change, please contact support.</p>`,
+			});
+			return messageId;
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
 }
 
 export const emailService = new EmailService(emailClient);

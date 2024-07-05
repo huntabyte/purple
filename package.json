@@ -52,6 +52,8 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@aws-sdk/client-s3": "^3.609.0",
+		"@aws-sdk/s3-request-presigner": "^3.609.0",
 		"@huntabyte/eslint-config": "^0.3.2",
 		"@libsql/client": "^0.7.0",
 		"@types/nodemailer": "^6.4.15",

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { superForm } from "sveltekit-superforms";
 	import { toast } from "svelte-sonner";
-	import type { SVCancelEmailChange } from "./schemas";
+	import type { SVCancelEmailChange } from "../schemas";
 	import { page } from "$app/stores";
 	import { Button } from "$lib/components/ui/button";
 

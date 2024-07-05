@@ -32,6 +32,6 @@
 		</div>
 	</div>
 </div>
-<div class="container">
+<div class="container pb-12">
 	{@render children?.()}
 </div>

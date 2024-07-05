@@ -4,7 +4,7 @@
 		type SVCancelEmailChange,
 		type SVUpdateEmail,
 		type SVVerifyEmailChange,
-	} from "./schemas";
+	} from "../schemas";
 	import VerifyEmailChangeForm from "./verify-email-change-form.svelte";
 	import UpdateEmailForm from "./update-email-form.svelte";
 	import CancelEmailChangeForm from "./cancel-email-change-form.svelte";

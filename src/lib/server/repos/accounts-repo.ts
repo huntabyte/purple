@@ -7,6 +7,11 @@ type CreateAccountProps = {
 	hashedPassword: string;
 };
 
+type UpdatePasswordProps = {
+	userId: string;
+	hashedPassword: string;
+};
+
 export class AccountsRepo {
 	constructor(private readonly db: Database) {}
 
@@ -16,6 +21,15 @@ export class AccountsRepo {
 
 	async getByUserId(userId: string, tx = this.db) {
 		return await tx.select().from(accountsTable).where(eq(accountsTable.userId, userId)).get();
+	}
+
+	async updatePassword({ userId, hashedPassword }: UpdatePasswordProps, tx = this.db) {
+		return await tx
+			.update(accountsTable)
+			.set({ hashedPassword })
+			.where(eq(accountsTable.userId, userId))
+			.returning()
+			.get();
 	}
 }
 

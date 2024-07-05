@@ -1,16 +1,18 @@
 <script lang="ts">
-	import UpdateEmailCard from "./update-email-card.svelte";
-	import UpdateProfileCard from "./update-profile-card.svelte";
+	import EmailSettingsCard from "./(components)/email-settings-card.svelte";
+	import PasswordSettingsCard from "./(components)/password-settings-card.svelte";
+	import ProfileSettingsCard from "./(components)/profile-settings-card.svelte";
 
 	let { data } = $props();
 </script>
 
 <div class="flex flex-col gap-8">
-	<UpdateProfileCard updateProfileForm={data.updateProfileForm} />
-	<UpdateEmailCard
+	<ProfileSettingsCard updateProfileForm={data.updateProfileForm} />
+	<EmailSettingsCard
 		cancelEmailChangeForm={data.cancelEmailChangeForm}
 		pendingEmailChangeVerification={data.pendingEmailChangeVerification}
 		updateEmailForm={data.updateEmailForm}
 		verifyEmailChangeForm={data.verifyEmailChangeForm}
 	/>
+	<PasswordSettingsCard updatePasswordForm={data.updatePasswordForm} />
 </div>

@@ -57,6 +57,12 @@ type VerifyUserPasswordProps = {
 	userId: string;
 };
 
+type ChangePasswordProps = {
+	userId: string;
+	currentPassword: string;
+	newPassword: string;
+};
+
 type AuthServiceDeps = {
 	lucia: Lucia;
 	usersRepo: UsersRepo;
@@ -382,6 +388,9 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Returns a boolean indicating whether a user has an active email change request.
+	 */
 	async getEmailChangeRequestStatus(userId: string) {
 		try {
 			const token = await this.deps.emailChangeTokensService.getTokenByUserId(userId);
@@ -392,9 +401,30 @@ export class AuthService {
 		}
 	}
 
+	/**
+	 * Cancels an existing email change request for a user.
+	 */
 	async cancelEmailChangeRequest(userId: string) {
 		try {
 			await this.deps.emailChangeTokensService.revokeTokenByUserId({ userId });
+		} catch (err) {
+			throw handleException(err);
+		}
+	}
+
+	/**
+	 * Changes a user's password. The user must provide their current password to verify the
+	 * request. If successful, the user's password is updated and all existing sessions are
+	 * invalidated. A new session cookie is created and returned to be applied to the response.
+	 */
+	async changePassword({ userId, currentPassword, newPassword }: ChangePasswordProps) {
+		try {
+			await this.verifyUserPassword({ userId, password: currentPassword });
+			const hashedPassword = await this.hashPassword(newPassword);
+
+			await this.deps.accountsRepo.updatePassword({ userId, hashedPassword });
+			await this.invalidateUserSessions(userId);
+			return await this.createSessionAndCookie(userId);
 		} catch (err) {
 			throw handleException(err);
 		}

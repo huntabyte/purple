@@ -4,30 +4,38 @@ import { zod } from "sveltekit-superforms/adapters";
 import {
 	cancelEmailChangeRequestSchema,
 	updateEmailSchema,
+	updatePasswordSchema,
 	updateProfileSchema,
 	verifyEmailChangeSchema,
 } from "./schemas.js";
 import { usersService } from "$lib/server/services/users-service.js";
 import { handleException } from "$lib/errors.js";
-import { createMessage } from "$lib/helpers.js";
+import { createMessage, successMessage } from "$lib/helpers.js";
 import { authService } from "$lib/server/services/auth-service.js";
 import { ERROR_MESSAGES } from "$lib/server/constants.js";
 
 export async function load(event) {
 	if (!event.locals.session) redirect(302, "/login");
 
-	const [profile, pendingEmailChangeVerification] = await Promise.all([
+	const [profile] = await Promise.all([
 		usersService.getProfileByUserId(event.locals.session.userId),
-		authService.getEmailChangeRequestStatus(event.locals.session.userId),
 	]);
 
-	const [updateProfileForm, updateEmailForm, verifyEmailChangeForm, cancelEmailChangeForm] =
-		await Promise.all([
-			superValidate(profile, zod(updateProfileSchema)),
-			superValidate(zod(updateEmailSchema)),
-			superValidate(zod(verifyEmailChangeSchema)),
-			superValidate(zod(cancelEmailChangeRequestSchema)),
-		]);
+	const [
+		updateProfileForm,
+		updateEmailForm,
+		verifyEmailChangeForm,
+		cancelEmailChangeForm,
+		updatePasswordForm,
+		pendingEmailChangeVerification,
+	] = await Promise.all([
+		superValidate(profile, zod(updateProfileSchema)),
+		superValidate(zod(updateEmailSchema)),
+		superValidate(zod(verifyEmailChangeSchema)),
+		superValidate(zod(cancelEmailChangeRequestSchema)),
+		superValidate(zod(updatePasswordSchema)),
+		authService.getEmailChangeRequestStatus(event.locals.session.userId),
+	]);
 
 	return {
 		pendingEmailChangeVerification,
@@ -35,6 +43,7 @@ export async function load(event) {
 		updateEmailForm,
 		verifyEmailChangeForm,
 		cancelEmailChangeForm,
+		updatePasswordForm,
 	};
 }
 
@@ -153,5 +162,28 @@ export const actions: Actions = {
 			form,
 			createMessage({ type: "success", text: "Email change request cancelled!" })
 		);
+	},
+	updatePassword: async (event) => {
+		if (!event.locals.session) error(401, ERROR_MESSAGES.UNAUTHORIZED);
+		const form = await superValidate(event, zod(updatePasswordSchema));
+		if (!form.valid) return fail(400, { form });
+
+		try {
+			const sessionCookie = await authService.changePassword({
+				userId: event.locals.session.userId,
+				...form.data,
+			});
+			event.locals.setSessionCookie(sessionCookie);
+		} catch (err) {
+			const e = handleException(err);
+			if (e.code === "INVALID_CREDENTIALS") {
+				return setError(form, "currentPassword", "Invalid password.");
+			}
+			return message(form, createMessage({ code: e.code, text: e.message, type: "error" }), {
+				status: e.status,
+			});
+		}
+
+		return message(form, successMessage("Password updated successfully!"));
 	},
 };
