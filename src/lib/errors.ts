@@ -32,7 +32,8 @@ type CustomErrorCode =
 	| "TOKEN_INVALID"
 	| "SEND_EMAIL_ERROR"
 	| "TOKEN_ISSUE_ERROR"
-	| "TOKEN_REVOKE_ERROR";
+	| "TOKEN_REVOKE_ERROR"
+	| "INVALID_IMAGE_TYPE";
 
 export type ErrorCode = HttpErrorCode | CustomErrorCode;
 
@@ -76,6 +77,7 @@ const errorCodeToStatusMap: Record<ErrorCode, ErrorStatus> = {
 	SEND_EMAIL_ERROR: 500,
 	TOKEN_ISSUE_ERROR: 500,
 	TOKEN_REVOKE_ERROR: 500,
+	INVALID_IMAGE_TYPE: 400,
 };
 
 export function getStatusFromErrorCode(code: ErrorCode): ErrorStatus {
@@ -113,6 +115,8 @@ export function getMessageFromErrorCode(code: ErrorCode): string {
 			return "Your token has expired. Please request a new one.";
 		case "TOKEN_INVALID":
 			return "The token you provided is invalid. Please try again or request a new one.";
+		case "INVALID_IMAGE_TYPE":
+			return "The image you uploaded is not a valid image type.";
 		default:
 			return "An internal server error occurred.";
 	}

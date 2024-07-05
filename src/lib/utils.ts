@@ -58,3 +58,10 @@ export function flyAndScale(
 export function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export async function generateChecksumFromFile(file: File, algorithm = "SHA-256") {
+	const buffer = await file.arrayBuffer();
+	const hashBuffer = await crypto.subtle.digest(algorithm, buffer);
+	const hashArray = Array.from(new Uint8Array(hashBuffer));
+	return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+}
